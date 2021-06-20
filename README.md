@@ -1,17 +1,17 @@
-# react-native-collapsible
+# @r0b0t3d/react-native-collapsible
 
 Fully customizable collapsible views
 
 ## Installation
 
 ```sh
-npm install react-native-collapsible
+npm install @r0b0t3d/react-native-collapsible
 ```
 
 ## Usage
 
 ```js
-import Collapsible from "react-native-collapsible";
+import Collapsible from "@r0b0t3d/react-native-collapsible";
 
 // ...
 

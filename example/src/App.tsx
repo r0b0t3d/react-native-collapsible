@@ -1,31 +1,32 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import Collapsible from 'react-native-collapsible';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import HomeScreen from './screens/HomeScreen';
+import CollapsibleFlatListScreen from './screens/CollapsibleFlatListScreen';
+import CollapsibleScrollViewScreen from './screens/CollapsibleScrollViewScreen';
+import AdvancedCombinationScreen from './screens/AdvancedCombinationScreen';
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    Collapsible.multiply(3, 7).then(setResult);
-  }, []);
-
   return (
-    <View style={styles.container}>
-      <Text>Result: {result}</Text>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="HomeScreen" component={HomeScreen} />
+        <Stack.Screen
+          name="CollapsibleFlatListScreen"
+          component={CollapsibleFlatListScreen}
+        />
+        <Stack.Screen
+          name="CollapsibleScrollViewScreen"
+          component={CollapsibleScrollViewScreen}
+        />
+        <Stack.Screen
+          name="AdvancedCombinationScreen"
+          component={AdvancedCombinationScreen}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
-  },
-});
