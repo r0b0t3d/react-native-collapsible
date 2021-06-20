@@ -9,6 +9,10 @@ Fully customizable collapsible views
 yarn add @r0b0t3d/react-native-collapsible
 ```
 
+Currently, I am using `react-native-reanimated` for animation. So you should install it as well
+
+`$ yarn add react-native-reanimated`
+
 ## Usage
 
 ```js
