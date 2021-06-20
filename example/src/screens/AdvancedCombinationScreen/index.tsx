@@ -107,6 +107,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   tabSelected: {
-    backgroundColor: 'blue',
+    backgroundColor: 'cyan',
   },
 });
