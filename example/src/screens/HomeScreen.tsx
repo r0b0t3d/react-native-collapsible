@@ -30,6 +30,10 @@ export default function Home({}: Props) {
         title={'Advanced combination'}
         onPress={navigate('AdvancedCombinationScreen')}
       />
+      <MenuItem
+        title={'CollapsibleView'}
+        onPress={navigate('CollapsibleViewScreen')}
+      />
     </View>
   );
 }

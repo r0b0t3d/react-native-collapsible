@@ -6,6 +6,7 @@ import HomeScreen from './screens/HomeScreen';
 import CollapsibleFlatListScreen from './screens/CollapsibleFlatListScreen';
 import CollapsibleScrollViewScreen from './screens/CollapsibleScrollViewScreen';
 import AdvancedCombinationScreen from './screens/AdvancedCombinationScreen';
+import CollapsibleViewScreen from './screens/CollapsibleViewScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,10 @@ export default function App() {
         <Stack.Screen
           name="AdvancedCombinationScreen"
           component={AdvancedCombinationScreen}
+        />
+        <Stack.Screen
+          name="CollapsibleViewScreen"
+          component={CollapsibleViewScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

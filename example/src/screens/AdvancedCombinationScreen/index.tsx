@@ -57,9 +57,11 @@ function AdvancedCombinationScreen() {
               <Text>ScrollView</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.searchBox}>
-            <TextInput placeholder="search" onFocus={collapse} />
-          </View>
+          {currentTab === Tabs.FlatList && (
+            <View style={styles.searchBox}>
+              <TextInput placeholder="search" onFocus={collapse} />
+            </View>
+          )}
         </View>
       </CollapsibleHeaderContainer>
       {currentTab === Tabs.FlatList && <FlatListTab />}
@@ -88,12 +90,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 10,
     paddingHorizontal: 10,
-    marginVertical: 10,
+    marginBottom: 10,
   },
   tabsContainer: {
     flexDirection: 'row',
     marginHorizontal: 20,
     marginTop: 10,
+    marginBottom: 10,
   },
   tab: {
     flex: 1,
@@ -101,6 +104,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderWidth: 1,
     borderColor: 'blue',
+    backgroundColor: 'white',
   },
   tabSelected: {
     backgroundColor: 'blue',
