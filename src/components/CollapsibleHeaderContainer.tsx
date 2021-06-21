@@ -1,5 +1,11 @@
 import React, { ReactNode, useCallback, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import {
+  LayoutChangeEvent,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedStyle,
@@ -9,11 +15,15 @@ import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
 
 type Props = {
   children: ReactNode;
+  containerStyle?: StyleProp<ViewStyle>;
 };
 
 let key = 0;
 
-export default function CollapsibleHeaderContainer({ children }: Props) {
+export default function CollapsibleHeaderContainer({
+  children,
+  containerStyle,
+}: Props) {
   const [contentKey] = useState(key++);
   const { scrollY, headerHeight, persistHeaderHeight } =
     useCollapsibleContext();
@@ -56,6 +66,7 @@ export default function CollapsibleHeaderContainer({ children }: Props) {
         key={`collapsible-flatlist-${contentKey}`}
         onLayout={handleHeaderLayout}
         pointerEvents="box-none"
+        style={containerStyle}
       >
         {children}
       </View>

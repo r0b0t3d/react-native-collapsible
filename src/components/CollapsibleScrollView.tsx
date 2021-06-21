@@ -15,6 +15,7 @@ type Props = ScrollViewProps &
 
 export default function CollapsibleScrollView({
   persistHeaderHeight = 0,
+  headerSnappable = true,
   contentMinHeight = wHeight,
   children,
 }: Props) {
@@ -31,6 +32,7 @@ export default function CollapsibleScrollView({
 
   const { scrollHandler } = useAnimatedScroll({
     persistHeaderHeight,
+    headerSnappable,
     scrollTo,
   });
 

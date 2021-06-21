@@ -13,11 +13,13 @@ const { height: wHeight } = Dimensions.get('window');
 
 type Props = {
   persistHeaderHeight: number;
+  headerSnappable: boolean;
   scrollTo: (yValue: number, animated?: boolean) => void;
 };
 
 export default function useAnimatedScroll({
   persistHeaderHeight,
+  headerSnappable,
   scrollTo,
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
@@ -67,6 +69,7 @@ export default function useAnimatedScroll({
         }
       },
       onEndDrag: () => {
+        if (!headerSnappable) return;
         const maxY = headerHeight.value - persistHeaderHeight;
         if (scrollY.value < maxY) {
           const delta = Math.abs(scrollY.value - maxY);
@@ -80,7 +83,7 @@ export default function useAnimatedScroll({
         }
       },
     },
-    [scrollTo, persistHeaderHeight]
+    [scrollTo, persistHeaderHeight, headerSnappable]
   );
 
   return {

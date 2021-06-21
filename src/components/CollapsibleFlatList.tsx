@@ -21,6 +21,7 @@ type Props<Data> = Omit<FlatListProps<Data>, 'scrollEnabled'> &
 
 export default function CollapsibleFlatList<Data>({
   persistHeaderHeight = 0,
+  headerSnappable = true,
   contentMinHeight = wHeight,
   ...props
 }: Props<Data>) {
@@ -36,6 +37,7 @@ export default function CollapsibleFlatList<Data>({
 
   const { scrollHandler } = useAnimatedScroll({
     persistHeaderHeight,
+    headerSnappable,
     scrollTo,
   });
 
