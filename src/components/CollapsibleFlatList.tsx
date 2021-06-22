@@ -25,7 +25,7 @@ export default function CollapsibleFlatList<Data>({
   contentMinHeight = wHeight,
   ...props
 }: Props<Data>) {
-  const scrollView = useRef<FlatList>();
+  const scrollView = useRef<FlatList>(null);
   const { headerHeight } = useCollapsibleContext();
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
@@ -52,19 +52,20 @@ export default function CollapsibleFlatList<Data>({
   );
 
   return (
+    // @ts-ignore
     <AnimatedFlatList
-      // @ts-ignore
       ref={scrollView}
       bounces={false}
-      contentContainerStyle={[
-        styles.contentContainer,
-        { minHeight: contentMinHeight },
-      ]}
-      onScroll={scrollHandler}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       scrollEventThrottle={16}
       {...props}
+      contentContainerStyle={[
+        styles.contentContainer,
+        { minHeight: contentMinHeight },
+        props.contentContainerStyle,
+      ]}
+      onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
     />
   );

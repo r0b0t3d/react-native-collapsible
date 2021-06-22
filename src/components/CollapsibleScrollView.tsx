@@ -18,6 +18,7 @@ export default function CollapsibleScrollView({
   headerSnappable = true,
   contentMinHeight = wHeight,
   children,
+  ...props
 }: Props) {
   const scrollView = useRef<Animated.ScrollView>(null);
   const { headerHeight } = useCollapsibleContext();
@@ -40,7 +41,11 @@ export default function CollapsibleScrollView({
     <Animated.ScrollView
       ref={scrollView}
       bounces={false}
-      contentContainerStyle={[styles.contentContainer]}
+      {...props}
+      contentContainerStyle={[
+        styles.contentContainer,
+        props.contentContainerStyle,
+      ]}
       onScroll={scrollHandler}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
