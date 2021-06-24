@@ -33,7 +33,7 @@ export default function useAnimatedScroll({
 
   useEffect(() => {
     if (scrollY.value > 0) {
-      scrollTo(scrollY.value, false);
+      requestAnimationFrame(() => scrollTo(scrollY.value, false));
     }
   }, []);
 
