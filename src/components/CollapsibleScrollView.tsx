@@ -1,7 +1,14 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
-import React, { ReactNode, useCallback, useRef } from 'react';
-import { Dimensions, ScrollViewProps, StyleSheet, View } from 'react-native';
+import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import {
+  Dimensions,
+  LayoutChangeEvent,
+  ScrollViewProps,
+  StyleSheet,
+  View,
+} from 'react-native';
 import Animated from 'react-native-reanimated';
 import type { CollapsibleProps } from '../types';
 import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
@@ -16,12 +23,13 @@ type Props = ScrollViewProps &
 export default function CollapsibleScrollView({
   persistHeaderHeight = 0,
   headerSnappable = true,
-  contentMinHeight = wHeight,
   children,
   ...props
 }: Props) {
   const scrollView = useRef<Animated.ScrollView>(null);
   const { headerHeight } = useCollapsibleContext();
+  const [internalContentMinHeight, setInternalContentMinHeight] =
+    useState(wHeight);
 
   const scrollTo = useCallback(
     (yValue: number, animated = true) => {
@@ -37,6 +45,13 @@ export default function CollapsibleScrollView({
     scrollTo,
   });
 
+  const handleLayout = useCallback((layout: LayoutChangeEvent) => {
+    const height = layout.nativeEvent.layout.height;
+    setInternalContentMinHeight(
+      height + headerHeight.value - persistHeaderHeight
+    );
+  }, []);
+
   return (
     <Animated.ScrollView
       ref={scrollView}
@@ -50,8 +65,9 @@ export default function CollapsibleScrollView({
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       scrollEventThrottle={16}
+      onLayout={handleLayout}
     >
-      <View style={{ minHeight: contentMinHeight }}>
+      <View style={{ minHeight: internalContentMinHeight }}>
         <AnimatedTopView height={headerHeight} />
         {children}
       </View>

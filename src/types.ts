@@ -18,6 +18,5 @@ export type CollapsibleContextInternalType = {
 
 export type CollapsibleProps = {
   persistHeaderHeight?: number;
-  contentMinHeight?: number;
   headerSnappable?: boolean;
 };

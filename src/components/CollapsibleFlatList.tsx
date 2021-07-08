@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   FlatListProps,
   FlatList,
   View,
   Dimensions,
   StyleSheet,
+  LayoutChangeEvent,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
@@ -22,11 +23,12 @@ type Props<Data> = Omit<FlatListProps<Data>, 'scrollEnabled'> &
 export default function CollapsibleFlatList<Data>({
   persistHeaderHeight = 0,
   headerSnappable = true,
-  contentMinHeight = wHeight,
   ...props
 }: Props<Data>) {
   const scrollView = useRef<FlatList>(null);
   const { headerHeight } = useCollapsibleContext();
+  const [internalContentMinHeight, setInternalContentMinHeight] =
+    useState(wHeight);
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
     scrollView.current?.scrollToOffset({
@@ -40,6 +42,13 @@ export default function CollapsibleFlatList<Data>({
     headerSnappable,
     scrollTo,
   });
+
+  const handleLayout = useCallback((layout: LayoutChangeEvent) => {
+    const height = layout.nativeEvent.layout.height;
+    setInternalContentMinHeight(
+      height + headerHeight.value - persistHeaderHeight
+    );
+  }, []);
 
   const renderListHeader = useCallback(
     () => (
@@ -62,11 +71,12 @@ export default function CollapsibleFlatList<Data>({
       {...props}
       contentContainerStyle={[
         styles.contentContainer,
-        { minHeight: contentMinHeight },
+        { minHeight: internalContentMinHeight },
         props.contentContainerStyle,
       ]}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
+      onLayout={handleLayout}
     />
   );
 }

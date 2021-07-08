@@ -28,7 +28,7 @@ function CollapsibleContainer({ children }: Props) {
       persistHeaderHeight,
       headerCollapsed,
     };
-  }, [headerHeight, scrollY, persistHeaderHeight, headerCollapsed]);
+  }, [persistHeaderHeight, scrollY, headerHeight, headerCollapsed]);
 
   const internalContext = useMemo(
     () => ({
