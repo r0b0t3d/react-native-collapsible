@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect } from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, LayoutChangeEvent } from 'react-native';
 import {
   runOnJS,
   useAnimatedScrollHandler,
@@ -28,6 +28,7 @@ export default function useAnimatedScroll({
     headerHeight,
     persistHeaderHeight: animatedPersistHeaderHeight,
     headerCollapsed,
+    contentMinHeight,
   } = useCollapsibleContext();
   const { setCollapsibleHandlers } = useInternalCollapsibleContext();
 
@@ -36,13 +37,6 @@ export default function useAnimatedScroll({
       requestAnimationFrame(() => scrollTo(scrollY.value, false));
     }
   }, []);
-
-  useEffect(() => {
-    setCollapsibleHandlers({
-      collapse,
-      expand,
-    });
-  }, [setCollapsibleHandlers, scrollTo, headerHeight, persistHeaderHeight]);
 
   useEffect(() => {
     animatedPersistHeaderHeight.value = persistHeaderHeight;
@@ -54,6 +48,13 @@ export default function useAnimatedScroll({
   );
 
   const expand = useCallback(() => scrollTo(0), [scrollTo]);
+
+  useEffect(() => {
+    setCollapsibleHandlers({
+      collapse,
+      expand,
+    });
+  }, [setCollapsibleHandlers, collapse, expand]);
 
   const scrollHandler = useAnimatedScrollHandler(
     {
@@ -86,9 +87,15 @@ export default function useAnimatedScroll({
     [scrollTo, persistHeaderHeight, headerSnappable]
   );
 
+  const handleContainerLayout = useCallback((layout: LayoutChangeEvent) => {
+    const height = layout.nativeEvent.layout.height;
+    contentMinHeight.value = height + headerHeight.value - persistHeaderHeight;
+  }, []);
+
   return {
     scrollHandler,
     collapse,
     expand,
+    handleContainerLayout,
   };
 }

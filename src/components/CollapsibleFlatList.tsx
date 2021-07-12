@@ -1,21 +1,12 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useRef, useState } from 'react';
-import {
-  FlatListProps,
-  FlatList,
-  View,
-  Dimensions,
-  StyleSheet,
-  LayoutChangeEvent,
-} from 'react-native';
-import Animated from 'react-native-reanimated';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { FlatListProps, FlatList, View, StyleSheet } from 'react-native';
+import Animated, { runOnJS, useDerivedValue } from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
 import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
 import type { CollapsibleProps } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
-const { height: wHeight } = Dimensions.get('window');
 
 type Props<Data> = Omit<FlatListProps<Data>, 'scrollEnabled'> &
   CollapsibleProps;
@@ -26,9 +17,10 @@ export default function CollapsibleFlatList<Data>({
   ...props
 }: Props<Data>) {
   const scrollView = useRef<FlatList>(null);
-  const { headerHeight } = useCollapsibleContext();
-  const [internalContentMinHeight, setInternalContentMinHeight] =
-    useState(wHeight);
+  const { headerHeight, contentMinHeight } = useCollapsibleContext();
+  const [internalContentMinHeight, setInternalContentMinHeight] = useState(
+    contentMinHeight.value
+  );
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
     scrollView.current?.scrollToOffset({
@@ -37,27 +29,32 @@ export default function CollapsibleFlatList<Data>({
     });
   }, []);
 
-  const { scrollHandler } = useAnimatedScroll({
+  const { scrollHandler, handleContainerLayout } = useAnimatedScroll({
     persistHeaderHeight,
     headerSnappable,
     scrollTo,
   });
 
-  const handleLayout = useCallback((layout: LayoutChangeEvent) => {
-    const height = layout.nativeEvent.layout.height;
-    setInternalContentMinHeight(
-      height + headerHeight.value - persistHeaderHeight
-    );
-  }, []);
+  useDerivedValue(() => {
+    if (contentMinHeight.value !== internalContentMinHeight) {
+      runOnJS(setInternalContentMinHeight)(contentMinHeight.value);
+    }
+  }, [internalContentMinHeight]);
 
-  const renderListHeader = useCallback(
-    () => (
-      <View>
-        <AnimatedTopView height={headerHeight} />
-        {props.ListHeaderComponent}
-      </View>
-    ),
-    [props.ListHeaderComponent]
+  const contentContainerStyle = useMemo(
+    () => [
+      styles.contentContainer,
+      { minHeight: internalContentMinHeight },
+      props.contentContainerStyle,
+    ],
+    [props.contentContainerStyle, internalContentMinHeight]
+  );
+
+  const renderListHeader = () => (
+    <View>
+      <AnimatedTopView height={headerHeight} />
+      {props.ListHeaderComponent}
+    </View>
   );
 
   return (
@@ -68,15 +65,12 @@ export default function CollapsibleFlatList<Data>({
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       scrollEventThrottle={16}
+      style={styles.container}
       {...props}
-      contentContainerStyle={[
-        styles.contentContainer,
-        { minHeight: internalContentMinHeight },
-        props.contentContainerStyle,
-      ]}
+      contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
-      onLayout={handleLayout}
+      onLayout={handleContainerLayout}
     />
   );
 }
@@ -84,6 +78,7 @@ export default function CollapsibleFlatList<Data>({
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
+    flex: 1,
   },
   contentContainer: {
     flexGrow: 1,

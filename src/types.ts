@@ -10,6 +10,7 @@ export type CollapsibleContextType = CollapsibleHandles & {
   headerHeight: Animated.SharedValue<number>;
   headerCollapsed: Animated.SharedValue<boolean>;
   persistHeaderHeight: Animated.SharedValue<number>;
+  contentMinHeight: Animated.SharedValue<number>;
 };
 
 export type CollapsibleContextInternalType = {

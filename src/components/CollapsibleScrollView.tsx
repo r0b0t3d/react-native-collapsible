@@ -1,19 +1,10 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
-import {
-  Dimensions,
-  LayoutChangeEvent,
-  ScrollViewProps,
-  StyleSheet,
-  View,
-} from 'react-native';
-import Animated from 'react-native-reanimated';
+import React, { ReactNode, useCallback, useMemo, useRef } from 'react';
+import { ScrollViewProps, StyleSheet } from 'react-native';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { CollapsibleProps } from '../types';
 import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
-
-const { height: wHeight } = Dimensions.get('window');
 
 type Props = ScrollViewProps &
   CollapsibleProps & {
@@ -27,50 +18,46 @@ export default function CollapsibleScrollView({
   ...props
 }: Props) {
   const scrollView = useRef<Animated.ScrollView>(null);
-  const { headerHeight } = useCollapsibleContext();
-  const [internalContentMinHeight, setInternalContentMinHeight] =
-    useState(wHeight);
+  const { headerHeight, contentMinHeight } = useCollapsibleContext();
 
-  const scrollTo = useCallback(
-    (yValue: number, animated = true) => {
-      // @ts-ignore
-      scrollView.current?.scrollTo({ y: yValue, animated });
-    },
-    [scrollView]
-  );
+  const scrollTo = useCallback((yValue: number, animated = true) => {
+    // @ts-ignore
+    scrollView.current?.scrollTo({ y: yValue, animated });
+  }, []);
 
-  const { scrollHandler } = useAnimatedScroll({
+  const { scrollHandler, handleContainerLayout } = useAnimatedScroll({
     persistHeaderHeight,
     headerSnappable,
     scrollTo,
   });
 
-  const handleLayout = useCallback((layout: LayoutChangeEvent) => {
-    const height = layout.nativeEvent.layout.height;
-    setInternalContentMinHeight(
-      height + headerHeight.value - persistHeaderHeight
-    );
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      minHeight: contentMinHeight.value,
+    };
   }, []);
+
+  const contentContainerStyle = useMemo(
+    () => [styles.contentContainer, props.contentContainerStyle],
+    [props.contentContainerStyle]
+  );
 
   return (
     <Animated.ScrollView
       ref={scrollView}
       bounces={false}
       {...props}
-      contentContainerStyle={[
-        styles.contentContainer,
-        props.contentContainerStyle,
-      ]}
+      contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       scrollEventThrottle={16}
-      onLayout={handleLayout}
+      onLayout={handleContainerLayout}
     >
-      <View style={{ minHeight: internalContentMinHeight }}>
+      <Animated.View style={animatedStyle}>
         <AnimatedTopView height={headerHeight} />
         {children}
-      </View>
+      </Animated.View>
     </Animated.ScrollView>
   );
 }

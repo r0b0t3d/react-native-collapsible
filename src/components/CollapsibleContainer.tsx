@@ -14,6 +14,7 @@ function CollapsibleContainer({ children }: Props) {
   const scrollY = useSharedValue(0);
   const persistHeaderHeight = useSharedValue(0);
   const headerCollapsed = useSharedValue(false);
+  const contentMinHeight = useSharedValue(0);
 
   const setCollapsibleHandlers = useCallback((handlers) => {
     collapsibleHandlers.current = handlers;
@@ -27,8 +28,15 @@ function CollapsibleContainer({ children }: Props) {
       scrollY,
       persistHeaderHeight,
       headerCollapsed,
+      contentMinHeight,
     };
-  }, [persistHeaderHeight, scrollY, headerHeight, headerCollapsed]);
+  }, [
+    persistHeaderHeight,
+    scrollY,
+    headerHeight,
+    headerCollapsed,
+    contentMinHeight,
+  ]);
 
   const internalContext = useMemo(
     () => ({
