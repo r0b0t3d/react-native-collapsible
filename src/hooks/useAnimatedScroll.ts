@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, LayoutChangeEvent } from 'react-native';
 import {
   runOnJS,
   useAnimatedScrollHandler,
+  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated';
 import { useCollapsibleContext } from './useCollapsibleContext';
@@ -31,6 +32,7 @@ export default function useAnimatedScroll({
     contentMinHeight,
   } = useCollapsibleContext();
   const { setCollapsibleHandlers } = useInternalCollapsibleContext();
+  const [containerHeight, setContainerHeight] = useState(0);
 
   useEffect(() => {
     if (scrollY.value > 0) {
@@ -89,8 +91,13 @@ export default function useAnimatedScroll({
 
   const handleContainerLayout = useCallback((layout: LayoutChangeEvent) => {
     const height = layout.nativeEvent.layout.height;
-    contentMinHeight.value = height + headerHeight.value - persistHeaderHeight;
+    setContainerHeight(height);
   }, []);
+
+  useDerivedValue(() => {
+    contentMinHeight.value =
+      containerHeight + headerHeight.value - persistHeaderHeight;
+  }, [persistHeaderHeight, containerHeight]);
 
   return {
     scrollHandler,

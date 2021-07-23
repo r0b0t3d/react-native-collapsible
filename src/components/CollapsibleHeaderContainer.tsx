@@ -10,6 +10,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
 
@@ -35,7 +36,9 @@ export default function CollapsibleHeaderContainer({
         layout: { height },
       },
     }: LayoutChangeEvent) => {
-      headerHeight.value = height;
+      headerHeight.value = withTiming(height, {
+        duration: !headerContentReady.value ? 0 : 200,
+      });
       headerContentReady.value = true;
     },
     [headerHeight, headerContentReady]
