@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import {
   CollapsibleFlatList,
@@ -12,43 +12,40 @@ function CollapsibleFlatListScreen() {
 
   const { collapse } = useCollapsibleContext();
 
-  const renderHeader = useCallback(() => {
-    return (
-      <View pointerEvents="box-none">
-        <Image
-          source={{
-            uri: 'https://cdn.pixabay.com/photo/2020/03/22/06/57/game-background-4956017_960_720.jpg',
-          }}
-          style={styles.bannerImage}
-          // @ts-ignore
-          pointerEvents="none"
-        />
-        <View style={styles.searchBox}>
-          <TextInput
-            placeholder="search"
-            style={{ flex: 1 }}
-            onFocus={collapse}
-          />
-        </View>
-      </View>
-    );
-  }, [collapse]);
-
-  const renderItem = useCallback(({ index }) => {
+  const renderItem = ({ index }: { index: number }) => {
     return (
       <View style={styles.itemContainer}>
         <Text>{`Item-${index}`}</Text>
       </View>
     );
-  }, []);
+  };
 
   return (
-    <View>
-      <CollapsibleHeaderContainer>{renderHeader()}</CollapsibleHeaderContainer>
+    <View style={styles.container}>
+      <CollapsibleHeaderContainer>
+        <View pointerEvents="box-none">
+          <Image
+            source={{
+              uri: 'https://cdn.pixabay.com/photo/2020/03/22/06/57/game-background-4956017_960_720.jpg',
+            }}
+            style={styles.bannerImage}
+            // @ts-ignore
+            pointerEvents="none"
+          />
+          <View style={styles.searchBox}>
+            <TextInput
+              placeholder="search"
+              style={{ flex: 1 }}
+              onFocus={collapse}
+            />
+          </View>
+        </View>
+      </CollapsibleHeaderContainer>
       <CollapsibleFlatList
         data={data}
         renderItem={renderItem}
         persistHeaderHeight={55}
+        bounces
       />
     </View>
   );
@@ -57,6 +54,9 @@ function CollapsibleFlatListScreen() {
 export default withCollapsibleContext(CollapsibleFlatListScreen);
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   itemContainer: {
     height: 300,
     marginHorizontal: 20,

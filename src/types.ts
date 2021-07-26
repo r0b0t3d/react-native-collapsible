@@ -3,6 +3,7 @@ import type Animated from 'react-native-reanimated';
 export type CollapsibleHandles = {
   collapse: () => void;
   expand: () => void;
+  scrollTo: (offset: number, animate?: boolean) => void;
 };
 
 export type CollapsibleContextType = CollapsibleHandles & {

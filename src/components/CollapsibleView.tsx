@@ -1,6 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { ReactNode, useCallback, useState, useEffect } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+} from 'react';
 import {
   LayoutChangeEvent,
   StyleProp,
@@ -44,11 +50,8 @@ export default function CollapsibleView({
   containerStyle,
   collapsedBackgroundColor,
   expandedBackgroundColor,
-  useDynamicLayout = true,
 }: Props) {
-  const actualHeight = useSharedValue(100000000000);
-  const contentReady = useSharedValue(0);
-  const animating = useSharedValue(0);
+  const actualHeight = useSharedValue(11110);
   const [contentKey] = useState(key++);
 
   useEffect(() => {
@@ -56,27 +59,16 @@ export default function CollapsibleView({
     if (newValue === collapseState.value) {
       return;
     }
-    if (contentReady.value === 1) {
-      animating.value = 1;
-    }
     collapseState.value = newValue;
   }, [initialState]);
 
   const onToggle = useCallback(() => {
-    animating.value = 1;
-    collapseState.value = collapseState.value === 0 ? 1 : 0;
+    collapseState.value = withSpring(collapseState.value === 0 ? 1 : 0, {
+      overshootClamping: true,
+    });
   }, []);
 
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
-    if (
-      !useDynamicLayout &&
-      (contentReady.value === 1 || animating.value === 1)
-    ) {
-      return;
-    }
-    contentReady.value = 1;
-    console.log('layout', event.nativeEvent.layout.height);
-
     if (event.nativeEvent.layout.height > 0) {
       actualHeight.value = event.nativeEvent.layout.height;
     }
@@ -84,19 +76,11 @@ export default function CollapsibleView({
 
   const wrapperStyle = useAnimatedStyle(
     () => ({
-      height:
-        contentReady.value === 1
-          ? withSpring(
-              collapseState.value === 1 ? actualHeight.value : 0,
-              { damping: 5, stiffness: 130, overshootClamping: true },
-              (isFinished) => {
-                if (isFinished) {
-                  animating.value = 0;
-                }
-              }
-            )
-          : 0.1,
-      opacity: contentReady.value,
+      height: withSpring(collapseState.value === 1 ? actualHeight.value : 0, {
+        damping: 5,
+        stiffness: 130,
+        overshootClamping: true,
+      }),
     }),
     [actualHeight, contentKey]
   );
@@ -122,14 +106,17 @@ export default function CollapsibleView({
     return {};
   }, []);
 
+  const headerProps = useMemo(
+    () => ({ onToggle, collapsed: collapseState }),
+    [onToggle, collapseState]
+  );
+
   return (
     <Animated.View
       style={[containerStyle, containerAnimatedStyle]}
       pointerEvents="box-none"
     >
-      <View pointerEvents="box-none">
-        {renderHeader({ onToggle, collapsed: collapseState })}
-      </View>
+      <View pointerEvents="box-none">{renderHeader(headerProps)}</View>
       <Animated.View
         style={[styles.wrapper, wrapperStyle]}
         pointerEvents="box-none"

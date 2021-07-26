@@ -25,7 +25,7 @@ function AdvancedCombinationScreen() {
   const { collapse } = useCollapsibleContext();
 
   return (
-    <View>
+    <View style={styles.container}>
       <CollapsibleHeaderContainer>
         <View pointerEvents="box-none">
           <Image
@@ -73,6 +73,9 @@ function AdvancedCombinationScreen() {
 export default withCollapsibleContext(AdvancedCombinationScreen);
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   itemContainer: {
     height: 300,
     marginHorizontal: 20,

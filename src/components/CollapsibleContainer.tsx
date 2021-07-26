@@ -24,6 +24,8 @@ function CollapsibleContainer({ children }: Props) {
     return {
       collapse: () => collapsibleHandlers.current?.collapse(),
       expand: () => collapsibleHandlers.current?.expand(),
+      scrollTo: (offset: number, animate?: boolean) =>
+        collapsibleHandlers.current?.scrollTo(offset, animate),
       headerHeight,
       scrollY,
       persistHeaderHeight,
