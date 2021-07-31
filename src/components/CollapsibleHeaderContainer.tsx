@@ -50,8 +50,8 @@ export default function CollapsibleHeaderContainer({
     }
     const headerTranslate = interpolate(
       scrollY.value,
-      [0, headerHeight.value - persistHeaderHeight.value],
-      [0, -headerHeight.value + persistHeaderHeight.value],
+      [-250, 0, headerHeight.value - persistHeaderHeight.value],
+      [250, 0, -headerHeight.value + persistHeaderHeight.value],
       Animated.Extrapolate.CLAMP
     );
     return {

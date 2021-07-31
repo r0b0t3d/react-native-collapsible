@@ -15,7 +15,7 @@ Currently, I am using `react-native-reanimated` for animation. So you should ins
 
 ## Usage
 
-```js
+```jsx
 import {
     CollapsibleFlatList,
     CollapsibleScrollView,
@@ -44,6 +44,35 @@ const MyComponent = () => {
 }
 
 export default withCollapsibleContext(MyComponent); // <-- wrap your component with `withCollapsibleContext`
+```
+
+## Tips
+#### 1. Trigger scroll when scroll inside `CollapsibleHeaderContainer` 
+- If your header doesn't contains touchable component, try `pointerEvents="none"`
+```jsx
+<CollapsibleHeaderContainer>
+    <View pointerEvents="none">
+        <Text>Header</Text>
+    </View>
+</CollapsibleHeaderContainer>
+```
+- If your header contains touchable componet, try to set `pointerEvents="box-none"` for every nested views that contains touchable, otherwise use `pointerEvents="none"`
+```jsx
+<CollapsibleHeaderContainer>
+    <View pointerEvents="box-none"> // <-- this is parent view
+        <View pointerEvents="none"> // <-- this view doesn't contain touchable component
+            <Text>Header</Text>
+        </View>
+        <View pointerEvents="box-none"> // <-- this view contain touchable component
+            <View pointerEvents="none">
+                <Text>Some text</Text>
+            </View>
+            <TouchableOpacity>
+                <Text>Button</Text>
+            </TouchableOpacity>
+        </View>
+    </View>
+</CollapsibleHeaderContainer>
 ```
 
 ## Contributing

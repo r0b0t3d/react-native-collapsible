@@ -59,7 +59,10 @@ function AdvancedCombinationScreen() {
           </View>
           {currentTab === Tabs.FlatList && (
             <View style={styles.searchBox}>
-              <TextInput placeholder="search" onFocus={collapse} />
+              <TextInput
+                placeholder="search"
+                onFocus={() => requestAnimationFrame(collapse)}
+              />
             </View>
           )}
         </View>

@@ -20,6 +20,7 @@ export default function FlatListTab({}: Props) {
       data={data}
       renderItem={renderItem}
       persistHeaderHeight={105}
+      bounces
     />
   );
 }
