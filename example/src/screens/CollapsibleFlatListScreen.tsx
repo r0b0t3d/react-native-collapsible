@@ -41,12 +41,7 @@ function CollapsibleFlatListScreen() {
           </View>
         </View>
       </CollapsibleHeaderContainer>
-      <CollapsibleFlatList
-        data={data}
-        renderItem={renderItem}
-        persistHeaderHeight={55}
-        bounces
-      />
+      <CollapsibleFlatList data={data} renderItem={renderItem} bounces />
     </View>
   );
 }

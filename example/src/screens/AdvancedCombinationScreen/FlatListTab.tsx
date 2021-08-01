@@ -15,14 +15,7 @@ export default function FlatListTab({}: Props) {
     );
   }, []);
 
-  return (
-    <CollapsibleFlatList
-      data={data}
-      renderItem={renderItem}
-      persistHeaderHeight={105}
-      bounces
-    />
-  );
+  return <CollapsibleFlatList data={data} renderItem={renderItem} />;
 }
 
 const styles = StyleSheet.create({

@@ -15,11 +15,7 @@ export default function ScrollViewTab({}: Props) {
     );
   }, []);
 
-  return (
-    <CollapsibleScrollView persistHeaderHeight={58}>
-      {data.map(renderItem)}
-    </CollapsibleScrollView>
-  );
+  return <CollapsibleScrollView>{data.map(renderItem)}</CollapsibleScrollView>;
 }
 
 const styles = StyleSheet.create({

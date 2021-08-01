@@ -3,7 +3,7 @@ import { FlatListProps, FlatList, View, StyleSheet } from 'react-native';
 import Animated, { runOnJS, useDerivedValue } from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
-import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
+import useCollapsibleContext from '../hooks/useCollapsibleContext';
 import type { CollapsibleProps } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -12,7 +12,6 @@ type Props<Data> = Omit<FlatListProps<Data>, 'scrollEnabled'> &
   CollapsibleProps;
 
 export default function CollapsibleFlatList<Data>({
-  persistHeaderHeight = 0,
   headerSnappable = true,
   ...props
 }: Props<Data>) {
@@ -29,8 +28,7 @@ export default function CollapsibleFlatList<Data>({
     });
   }, []);
 
-  const { scrollHandler, handleContainerLayout } = useAnimatedScroll({
-    persistHeaderHeight,
+  const { scrollHandler } = useAnimatedScroll({
     headerSnappable,
     scrollTo,
   });
@@ -70,7 +68,6 @@ export default function CollapsibleFlatList<Data>({
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
-      onLayout={handleContainerLayout}
     />
   );
 }

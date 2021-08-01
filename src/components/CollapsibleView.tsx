@@ -1,12 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, {
-  ReactNode,
-  useCallback,
-  useState,
-  useEffect,
-  useMemo,
-} from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
   StyleProp,
@@ -52,7 +46,7 @@ export default function CollapsibleView({
   expandedBackgroundColor,
 }: Props) {
   const actualHeight = useSharedValue(11110);
-  const [contentKey] = useState(key++);
+  const contentKey = useMemo(() => `collapsible-view-${key++}`, []);
 
   useEffect(() => {
     const newValue = initialState === 'collapsed' ? 0 : 1;
@@ -126,7 +120,7 @@ export default function CollapsibleView({
           pointerEvents="box-none"
         >
           <View
-            key={`collapse-view-content-${contentKey}`}
+            key={contentKey}
             onLayout={handleLayout}
             pointerEvents="box-none"
           >

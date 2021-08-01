@@ -1,36 +1,30 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect } from 'react';
-import { Dimensions, LayoutChangeEvent } from 'react-native';
+import { Dimensions } from 'react-native';
 import {
   runOnJS,
   useAnimatedScrollHandler,
+  useDerivedValue,
   useSharedValue,
 } from 'react-native-reanimated';
-import { useCollapsibleContext } from './useCollapsibleContext';
+import useCollapsibleContext from './useCollapsibleContext';
 import { useInternalCollapsibleContext } from './useInternalCollapsibleContext';
 
 const { height: wHeight } = Dimensions.get('window');
 
 type Props = {
-  persistHeaderHeight: number;
   headerSnappable: boolean;
   scrollTo: (yValue: number, animated?: boolean) => void;
 };
 
 export default function useAnimatedScroll({
-  persistHeaderHeight,
   headerSnappable,
   scrollTo,
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
-  const {
-    scrollY,
-    headerHeight,
-    persistHeaderHeight: animatedPersistHeaderHeight,
-    headerCollapsed,
-    contentMinHeight,
-  } = useCollapsibleContext();
-  const { setCollapsibleHandlers } = useInternalCollapsibleContext();
+  const { scrollY, headerHeight, headerCollapsed } = useCollapsibleContext();
+  const { setCollapsibleHandlers, firstPersistViewY } =
+    useInternalCollapsibleContext();
 
   useEffect(() => {
     if (scrollY.value > 0) {
@@ -38,13 +32,15 @@ export default function useAnimatedScroll({
     }
   }, []);
 
-  useEffect(() => {
-    animatedPersistHeaderHeight.value = persistHeaderHeight;
-  }, [persistHeaderHeight]);
-
   const collapse = useCallback(
-    () => scrollTo(headerHeight.value - persistHeaderHeight),
-    [scrollTo]
+    () =>
+      scrollTo(
+        Math.min(
+          headerHeight.value,
+          headerHeight.value - firstPersistViewY.value
+        )
+      ),
+    [scrollTo, firstPersistViewY]
   );
 
   const expand = useCallback(() => scrollTo(0), [scrollTo]);
@@ -64,15 +60,10 @@ export default function useAnimatedScroll({
         const diff = scrollY.value - offset;
         scrollDirection.value = diff > 0 ? 'down' : diff < 0 ? 'up' : 'unknown';
         scrollY.value = offset;
-        const maxY = headerHeight.value - persistHeaderHeight;
-        const isCollapsed = offset >= maxY;
-        if (headerCollapsed) {
-          headerCollapsed.value = isCollapsed;
-        }
       },
       onEndDrag: () => {
         if (!headerSnappable) return;
-        const maxY = headerHeight.value - persistHeaderHeight;
+        const maxY = headerHeight.value - firstPersistViewY.value;
         if (scrollY.value < maxY) {
           const delta = Math.abs(scrollY.value - maxY);
           if (delta < wHeight / 2) {
@@ -85,18 +76,18 @@ export default function useAnimatedScroll({
         }
       },
     },
-    [scrollTo, persistHeaderHeight, headerSnappable]
+    [scrollTo, headerHeight, headerSnappable]
   );
 
-  const handleContainerLayout = useCallback((layout: LayoutChangeEvent) => {
-    const height = layout.nativeEvent.layout.height;
-    contentMinHeight.value = height + headerHeight.value - persistHeaderHeight;
+  useDerivedValue(() => {
+    const maxY = headerHeight.value - firstPersistViewY.value;
+    const isCollapsed = scrollY.value >= maxY;
+    headerCollapsed.value = isCollapsed;
   }, []);
 
   return {
     scrollHandler,
     collapse,
     expand,
-    handleContainerLayout,
   };
 }

@@ -8,7 +8,9 @@ import {
   View,
 } from 'react-native';
 import {
+  CollapsibleContainer,
   CollapsibleHeaderContainer,
+  PersistView,
   useCollapsibleContext,
   withCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
@@ -25,7 +27,7 @@ function AdvancedCombinationScreen() {
   const { collapse } = useCollapsibleContext();
 
   return (
-    <View style={styles.container}>
+    <CollapsibleContainer style={styles.container}>
       <CollapsibleHeaderContainer>
         <View pointerEvents="box-none">
           <Image
@@ -36,27 +38,30 @@ function AdvancedCombinationScreen() {
             // @ts-ignore
             pointerEvents="none"
           />
-          <View style={styles.tabsContainer}>
-            <TouchableOpacity
-              style={[
-                styles.tab,
-                currentTab === Tabs.FlatList ? styles.tabSelected : {},
-              ]}
-              onPress={() => setCurrentTab(Tabs.FlatList)}
-            >
-              <Text>FlatList</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.tab,
-                { marginLeft: 10 },
-                currentTab === Tabs.ScrollView ? styles.tabSelected : {},
-              ]}
-              onPress={() => setCurrentTab(Tabs.ScrollView)}
-            >
-              <Text>ScrollView</Text>
-            </TouchableOpacity>
-          </View>
+          <PersistView>
+            <View style={styles.tabsContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.tab,
+                  currentTab === Tabs.FlatList ? styles.tabSelected : {},
+                ]}
+                onPress={() => setCurrentTab(Tabs.FlatList)}
+              >
+                <Text>FlatList</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.tab,
+                  { marginLeft: 10 },
+                  currentTab === Tabs.ScrollView ? styles.tabSelected : {},
+                ]}
+                onPress={() => setCurrentTab(Tabs.ScrollView)}
+              >
+                <Text>ScrollView</Text>
+              </TouchableOpacity>
+            </View>
+          </PersistView>
+          <View style={{ height: 100, backgroundColor: 'yellow' }} />
           {currentTab === Tabs.FlatList && (
             <View style={styles.searchBox}>
               <TextInput
@@ -69,7 +74,7 @@ function AdvancedCombinationScreen() {
       </CollapsibleHeaderContainer>
       {currentTab === Tabs.FlatList && <FlatListTab />}
       {currentTab === Tabs.ScrollView && <ScrollViewTab />}
-    </View>
+    </CollapsibleContainer>
   );
 }
 

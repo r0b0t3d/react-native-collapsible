@@ -41,9 +41,7 @@ function CollapsibleScrollViewScreen() {
           </View>
         </View>
       </CollapsibleHeaderContainer>
-      <CollapsibleScrollView persistHeaderHeight={55}>
-        {data.map(renderItem)}
-      </CollapsibleScrollView>
+      <CollapsibleScrollView>{data.map(renderItem)}</CollapsibleScrollView>
     </View>
   );
 }
