@@ -63,13 +63,24 @@ function AdvancedCombinationScreen() {
           </PersistView>
           <View style={{ height: 100, backgroundColor: 'yellow' }} />
           {currentTab === Tabs.FlatList && (
+            <PersistView>
+              <View style={styles.searchBox}>
+                <TextInput
+                  placeholder="search"
+                  onFocus={() => requestAnimationFrame(collapse)}
+                />
+              </View>
+            </PersistView>
+          )}
+          <View style={{ height: 100, backgroundColor: 'yellow' }} />
+          <PersistView>
             <View style={styles.searchBox}>
               <TextInput
                 placeholder="search"
                 onFocus={() => requestAnimationFrame(collapse)}
               />
             </View>
-          )}
+          </PersistView>
         </View>
       </CollapsibleHeaderContainer>
       {currentTab === Tabs.FlatList && <FlatListTab />}

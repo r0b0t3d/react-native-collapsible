@@ -27,7 +27,10 @@ export type CollapsibleContextInternalType = {
   containerHeight: Animated.SharedValue<number>;
   containerRef: React.RefObject<View>;
   firstPersistViewY: Animated.SharedValue<number>;
-  handlePersistViewLayout: (viewKey: string, layout: LayoutParams) => void;
+  persitsViewTop: Animated.SharedValue<Record<string, number>>;
+  fixedHeaderHeight: Animated.SharedValue<number>;
+  handlePersistViewLayout: (viewKey: string, layout?: LayoutParams) => void;
+  handleHeaderContainerLayout: (height: number) => void;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;
 };
 

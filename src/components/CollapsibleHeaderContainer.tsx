@@ -11,7 +11,6 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
-  useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
@@ -35,8 +34,8 @@ export default function CollapsibleHeaderContainer({
     contentMinHeight,
     headerCollapsed,
   } = useCollapsibleContext();
-  const { containerHeight } = useInternalCollapsibleContext();
-  const fixedHeaderContentHeight = useSharedValue(0);
+  const { containerHeight, handleHeaderContainerLayout, fixedHeaderHeight } =
+    useInternalCollapsibleContext();
 
   const handleHeaderLayout = useCallback(
     ({
@@ -46,28 +45,31 @@ export default function CollapsibleHeaderContainer({
     }: LayoutChangeEvent) => {
       headerHeight.value = withTiming(height, {
         duration:
-          fixedHeaderContentHeight.value === 0 || headerCollapsed.value
-            ? 0
-            : 200,
+          fixedHeaderHeight.value === 0 || headerCollapsed.value ? 0 : 200,
       });
-      fixedHeaderContentHeight.value = height;
+      handleHeaderContainerLayout(height);
     },
-    [headerHeight, fixedHeaderContentHeight, headerCollapsed]
+    [
+      headerHeight,
+      fixedHeaderHeight,
+      headerCollapsed,
+      handleHeaderContainerLayout,
+    ]
   );
 
   useDerivedValue(() => {
-    if (containerHeight.value === 0 || fixedHeaderContentHeight.value === 0) {
+    if (containerHeight.value === 0 || fixedHeaderHeight.value === 0) {
       return;
     }
     const newContentHeight =
       containerHeight.value +
-      fixedHeaderContentHeight.value -
+      fixedHeaderHeight.value -
       persistHeaderHeight.value;
     contentMinHeight.value = newContentHeight;
   }, []);
 
   const headerStyle = useAnimatedStyle(() => {
-    if (fixedHeaderContentHeight.value === 0) {
+    if (fixedHeaderHeight.value === 0) {
       return {};
     }
     const headerTranslate = interpolate(
@@ -81,7 +83,7 @@ export default function CollapsibleHeaderContainer({
       transform: [{ translateY: headerTranslate }],
       minHeight: headerHeight.value,
     };
-  }, [persistHeaderHeight, headerHeight, fixedHeaderContentHeight]);
+  }, [headerHeight, fixedHeaderHeight]);
 
   return (
     <Animated.View
