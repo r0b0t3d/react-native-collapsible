@@ -68,6 +68,7 @@ export default function PersistView({ children, style }: Props) {
       ref={viewRef}
       onLayout={handleLayout}
       style={[styles.container, animatedStyle, style]}
+      pointerEvents="box-none"
     >
       {children}
     </Animated.View>

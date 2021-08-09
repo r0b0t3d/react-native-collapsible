@@ -32,16 +32,9 @@ export default function useAnimatedScroll({
     }
   }, []);
 
-  const collapse = useCallback(
-    () =>
-      scrollTo(
-        Math.min(
-          fixedHeaderHeight.value,
-          fixedHeaderHeight.value - firstPersistViewY.value
-        )
-      ),
-    [scrollTo, firstPersistViewY]
-  );
+  const collapse = useCallback(() => {
+    scrollTo(Math.min(fixedHeaderHeight.value, firstPersistViewY.value));
+  }, [scrollTo, fixedHeaderHeight, firstPersistViewY]);
 
   const expand = useCallback(() => scrollTo(0), [scrollTo]);
 

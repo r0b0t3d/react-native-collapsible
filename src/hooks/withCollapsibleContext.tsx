@@ -55,7 +55,9 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         const values: any = {};
         for (let i = 0; i < sortedKeys.length; i++) {
           values[sortedKeys[i]] = totalTop;
-          totalTop += viewPositions[sortedKeys[i]].height;
+          // Try minus 1 make it filled when scrolling up.
+          // Otherwise, we can see a small space between the persits views
+          totalTop += viewPositions[sortedKeys[i]].height - 1;
         }
         persitsViewTop.value = values;
         firstPersistViewY.value = viewPositions[sortedKeys[0]]?.top || 0;

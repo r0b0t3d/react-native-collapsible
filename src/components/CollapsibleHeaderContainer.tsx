@@ -64,22 +64,27 @@ export default function CollapsibleHeaderContainer({
     contentMinHeight.value = newContentHeight;
   }, []);
 
+  const headerTranslate = useDerivedValue(
+    () =>
+      interpolate(
+        scrollY.value,
+        // FIXME: can improve by geting maxY value of header and persist views
+        [-250, 0, 100000],
+        [250, 0, -100000],
+        Animated.Extrapolate.CLAMP
+      ),
+    []
+  );
+
   const headerStyle = useAnimatedStyle(() => {
     if (fixedHeaderHeight.value === 0) {
       return {};
     }
-    const headerTranslate = interpolate(
-      scrollY.value,
-      // FIXME: can improve by geting maxY value of header and persist views
-      [-250, 0, 100000],
-      [250, 0, -100000],
-      Animated.Extrapolate.CLAMP
-    );
     return {
-      transform: [{ translateY: headerTranslate }],
+      transform: [{ translateY: headerTranslate.value }],
       minHeight: headerHeight.value,
     };
-  }, [headerHeight, fixedHeaderHeight]);
+  }, [headerHeight, fixedHeaderHeight, headerTranslate]);
 
   return (
     <Animated.View
