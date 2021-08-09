@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo, useRef } from 'react';
 import type { CollapsibleHandles, LayoutParams } from '../types';
 import { CollapsibleContext } from './useCollapsibleContext';
 import { InternalCollapsibleContext } from './useInternalCollapsibleContext';
-import { useSharedValue } from 'react-native-reanimated';
+import { useSharedValue, withTiming } from 'react-native-reanimated';
 import type { View } from 'react-native';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
@@ -17,8 +17,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const contentMinHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
     const firstPersistViewY = useSharedValue(1000000);
+    const headerContainersHeight = useRef<Record<string, number>>({});
     const persitsViewTop = useSharedValue<Record<string, number>>({});
-
     const persistViewPositions = useRef<Record<string, LayoutParams>>({});
     const containerRef = useRef<View>(null);
 
@@ -74,8 +74,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
 
     const handlePersistViewLayout = useCallback(
       (viewKey: string, layout?: LayoutParams) => {
-        console.log(viewKey, layout);
-
         if (!layout) {
           delete persistViewPositions.current[viewKey];
         } else {
@@ -90,11 +88,24 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     );
 
     const handleHeaderContainerLayout = useCallback(
-      (headerHeight: number) => {
-        fixedHeaderHeight.value = headerHeight;
-        populateData(persistViewPositions.current, headerHeight);
+      (viewKey: string, height?: number) => {
+        if (!height) {
+          delete headerContainersHeight.current[viewKey];
+        } else {
+          headerContainersHeight.current[viewKey] = height;
+        }
+        const totalHeight = Object.keys(headerContainersHeight.current).reduce(
+          (acc, key) => headerContainersHeight.current[key] + acc,
+          0
+        );
+        headerHeight.value = withTiming(totalHeight, {
+          duration:
+            fixedHeaderHeight.value === 0 || headerCollapsed.value ? 0 : 200,
+        });
+        fixedHeaderHeight.value = totalHeight;
+        populateData(persistViewPositions.current, totalHeight);
       },
-      [populateData, fixedHeaderHeight]
+      [populateData, fixedHeaderHeight, headerCollapsed]
     );
 
     const internalContext = useMemo(
@@ -111,10 +122,10 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       [
         setCollapsibleHandlers,
         handlePersistViewLayout,
+        handleHeaderContainerLayout,
         containerHeight,
         firstPersistViewY,
         persitsViewTop,
-        handleHeaderContainerLayout,
         fixedHeaderHeight,
       ]
     );

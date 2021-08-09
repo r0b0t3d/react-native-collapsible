@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   CollapsibleContainer,
   CollapsibleHeaderContainer,
   PersistView,
-  useCollapsibleContext,
   withCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
 import FlatListTab from './FlatListTab';
@@ -23,8 +15,6 @@ enum Tabs {
 }
 function AdvancedCombinationScreen() {
   const [currentTab, setCurrentTab] = useState(Tabs.FlatList);
-
-  const { collapse } = useCollapsibleContext();
 
   return (
     <CollapsibleContainer style={styles.container}>
@@ -59,26 +49,6 @@ function AdvancedCombinationScreen() {
               >
                 <Text>ScrollView</Text>
               </TouchableOpacity>
-            </View>
-          </PersistView>
-          <View style={{ height: 100, backgroundColor: 'yellow' }} />
-          {currentTab === Tabs.FlatList && (
-            <PersistView>
-              <View style={styles.searchBox}>
-                <TextInput
-                  placeholder="search"
-                  onFocus={() => requestAnimationFrame(collapse)}
-                />
-              </View>
-            </PersistView>
-          )}
-          <View style={{ height: 100, backgroundColor: 'yellow' }} />
-          <PersistView>
-            <View style={styles.searchBox}>
-              <TextInput
-                placeholder="search"
-                onFocus={() => requestAnimationFrame(collapse)}
-              />
             </View>
           </PersistView>
         </View>

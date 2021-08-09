@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { FlatListProps, FlatList, View, StyleSheet } from 'react-native';
 import Animated, { runOnJS, useDerivedValue } from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
@@ -20,12 +26,25 @@ export default function CollapsibleFlatList<Data>({
   const [internalContentMinHeight, setInternalContentMinHeight] = useState(
     contentMinHeight.value
   );
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
     scrollView.current?.scrollToOffset({
       offset: yValue,
       animated,
     });
+  }, []);
+
+  const handleInternalContentHeight = useCallback((value: number) => {
+    if (mounted.current) {
+      setInternalContentMinHeight(value);
+    }
   }, []);
 
   const { scrollHandler } = useAnimatedScroll({
@@ -35,7 +54,7 @@ export default function CollapsibleFlatList<Data>({
 
   useDerivedValue(() => {
     if (contentMinHeight.value !== internalContentMinHeight) {
-      runOnJS(setInternalContentMinHeight)(contentMinHeight.value);
+      runOnJS(handleInternalContentHeight)(contentMinHeight.value);
     }
   }, [internalContentMinHeight]);
 
@@ -63,8 +82,8 @@ export default function CollapsibleFlatList<Data>({
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       scrollEventThrottle={16}
-      style={styles.container}
       {...props}
+      style={[styles.container, props.style]}
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
@@ -74,8 +93,7 @@ export default function CollapsibleFlatList<Data>({
 
 const styles = StyleSheet.create({
   container: {
-    overflow: 'hidden',
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
   },
   contentContainer: {
     flexGrow: 1,

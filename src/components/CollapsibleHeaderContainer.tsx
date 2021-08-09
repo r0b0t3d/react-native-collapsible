@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
-import React, { ReactNode, useCallback, useMemo } from 'react';
+import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
   StyleProp,
@@ -11,6 +12,7 @@ import Animated, {
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
+  useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
@@ -27,15 +29,15 @@ export default function CollapsibleHeaderContainer({
   containerStyle,
 }: Props) {
   const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
-  const {
-    scrollY,
-    headerHeight,
-    persistHeaderHeight,
-    contentMinHeight,
-    headerCollapsed,
-  } = useCollapsibleContext();
+  const { scrollY, persistHeaderHeight, contentMinHeight, headerCollapsed } =
+    useCollapsibleContext();
   const { containerHeight, handleHeaderContainerLayout, fixedHeaderHeight } =
     useInternalCollapsibleContext();
+  const headerHeight = useSharedValue(0);
+
+  useEffect(() => {
+    return () => handleHeaderContainerLayout(contentKey, undefined);
+  }, []);
 
   const handleHeaderLayout = useCallback(
     ({
@@ -44,17 +46,11 @@ export default function CollapsibleHeaderContainer({
       },
     }: LayoutChangeEvent) => {
       headerHeight.value = withTiming(height, {
-        duration:
-          fixedHeaderHeight.value === 0 || headerCollapsed.value ? 0 : 200,
+        duration: 200,
       });
-      handleHeaderContainerLayout(height);
+      handleHeaderContainerLayout(contentKey, height);
     },
-    [
-      headerHeight,
-      fixedHeaderHeight,
-      headerCollapsed,
-      handleHeaderContainerLayout,
-    ]
+    [contentKey, handleHeaderContainerLayout, headerCollapsed]
   );
 
   useDerivedValue(() => {
@@ -87,7 +83,7 @@ export default function CollapsibleHeaderContainer({
 
   return (
     <Animated.View
-      style={[styles.topView, headerStyle]}
+      style={[styles.topView, headerStyle, { zIndex: 100000 - key }]}
       pointerEvents="box-none"
     >
       <View
@@ -103,11 +99,5 @@ export default function CollapsibleHeaderContainer({
 }
 
 const styles = StyleSheet.create({
-  topView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
+  topView: {},
 });

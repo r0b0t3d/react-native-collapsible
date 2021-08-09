@@ -30,7 +30,7 @@ export type CollapsibleContextInternalType = {
   persitsViewTop: Animated.SharedValue<Record<string, number>>;
   fixedHeaderHeight: Animated.SharedValue<number>;
   handlePersistViewLayout: (viewKey: string, layout?: LayoutParams) => void;
-  handleHeaderContainerLayout: (height: number) => void;
+  handleHeaderContainerLayout: (viewKey: string, height?: number) => void;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;
 };
 
