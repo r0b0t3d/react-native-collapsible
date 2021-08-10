@@ -23,8 +23,14 @@ export default function useAnimatedScroll({
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
   const { scrollY, headerCollapsed } = useCollapsibleContext();
-  const { setCollapsibleHandlers, firstPersistViewY, fixedHeaderHeight } =
-    useInternalCollapsibleContext();
+  const {
+    setCollapsibleHandlers,
+    firstPersistViewY,
+    fixedHeaderHeight,
+    containerHeight,
+    persistHeaderHeight,
+    contentMinHeight,
+  } = useInternalCollapsibleContext();
 
   useEffect(() => {
     if (scrollY.value > 0) {
@@ -80,6 +86,17 @@ export default function useAnimatedScroll({
     const maxY = fixedHeaderHeight.value - firstPersistViewY.value;
     const isCollapsed = scrollY.value >= maxY;
     headerCollapsed.value = isCollapsed;
+  }, []);
+
+  useDerivedValue(() => {
+    if (containerHeight.value === 0 || fixedHeaderHeight.value === 0) {
+      return;
+    }
+    const newContentHeight =
+      containerHeight.value +
+      fixedHeaderHeight.value -
+      persistHeaderHeight.value;
+    contentMinHeight.value = newContentHeight;
   }, []);
 
   return {

@@ -12,8 +12,6 @@ export type CollapsibleContextType = CollapsibleHandles & {
   scrollY: Animated.SharedValue<number>;
   headerHeight: Animated.SharedValue<number>;
   headerCollapsed: Animated.SharedValue<boolean>;
-  persistHeaderHeight: Animated.SharedValue<number>;
-  contentMinHeight: Animated.SharedValue<number>;
 };
 
 export type LayoutParams = {
@@ -29,6 +27,8 @@ export type CollapsibleContextInternalType = {
   firstPersistViewY: Animated.SharedValue<number>;
   persitsViewTop: Animated.SharedValue<Record<string, number>>;
   fixedHeaderHeight: Animated.SharedValue<number>;
+  persistHeaderHeight: Animated.SharedValue<number>;
+  contentMinHeight: Animated.SharedValue<number>;
   handlePersistViewLayout: (viewKey: string, layout?: LayoutParams) => void;
   handleHeaderContainerLayout: (viewKey: string, height?: number) => void;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;

@@ -5,6 +5,7 @@ import { ScrollViewProps, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { CollapsibleProps } from '../types';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 
 type Props = ScrollViewProps &
   CollapsibleProps & {
@@ -17,7 +18,8 @@ export default function CollapsibleScrollView({
   ...props
 }: Props) {
   const scrollView = useRef<Animated.ScrollView>(null);
-  const { headerHeight, contentMinHeight } = useCollapsibleContext();
+  const { headerHeight } = useCollapsibleContext();
+  const { contentMinHeight } = useInternalCollapsibleContext();
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
     // @ts-ignore
@@ -66,7 +68,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingBottom: 100,
   },
   topView: {
     position: 'absolute',

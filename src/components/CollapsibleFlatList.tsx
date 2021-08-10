@@ -10,6 +10,7 @@ import Animated, { runOnJS, useDerivedValue } from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 import type { CollapsibleProps } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -22,7 +23,8 @@ export default function CollapsibleFlatList<Data>({
   ...props
 }: Props<Data>) {
   const scrollView = useRef<FlatList>(null);
-  const { headerHeight, contentMinHeight } = useCollapsibleContext();
+  const { headerHeight } = useCollapsibleContext();
+  const { contentMinHeight } = useInternalCollapsibleContext();
   const [internalContentMinHeight, setInternalContentMinHeight] = useState(
     contentMinHeight.value
   );
@@ -97,8 +99,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flexGrow: 1,
-    paddingBottom: 100,
-    overflow: 'hidden',
   },
   topView: {
     position: 'absolute',

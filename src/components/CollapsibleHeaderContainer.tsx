@@ -29,9 +29,8 @@ export default function CollapsibleHeaderContainer({
   containerStyle,
 }: Props) {
   const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
-  const { scrollY, persistHeaderHeight, contentMinHeight, headerCollapsed } =
-    useCollapsibleContext();
-  const { containerHeight, handleHeaderContainerLayout, fixedHeaderHeight } =
+  const { scrollY, headerCollapsed } = useCollapsibleContext();
+  const { handleHeaderContainerLayout, fixedHeaderHeight } =
     useInternalCollapsibleContext();
   const headerHeight = useSharedValue(0);
 
@@ -52,17 +51,6 @@ export default function CollapsibleHeaderContainer({
     },
     [contentKey, handleHeaderContainerLayout, headerCollapsed]
   );
-
-  useDerivedValue(() => {
-    if (containerHeight.value === 0 || fixedHeaderHeight.value === 0) {
-      return;
-    }
-    const newContentHeight =
-      containerHeight.value +
-      fixedHeaderHeight.value -
-      persistHeaderHeight.value;
-    contentMinHeight.value = newContentHeight;
-  }, []);
 
   const headerTranslate = useDerivedValue(
     () =>

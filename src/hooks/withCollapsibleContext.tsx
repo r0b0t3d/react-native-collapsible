@@ -26,26 +26,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       collapsibleHandlers.current = handlers;
     }, []);
 
-    const context = useMemo(() => {
-      return {
-        collapse: () => collapsibleHandlers.current?.collapse(),
-        expand: () => collapsibleHandlers.current?.expand(),
-        scrollTo: (offset: number, animate?: boolean) =>
-          collapsibleHandlers.current?.scrollTo(offset, animate),
-        headerHeight,
-        scrollY,
-        persistHeaderHeight,
-        headerCollapsed,
-        contentMinHeight,
-      };
-    }, [
-      persistHeaderHeight,
-      scrollY,
-      headerHeight,
-      headerCollapsed,
-      contentMinHeight,
-    ]);
-
     const populateData = useCallback(
       (viewPositions: any, headerHeight: number) => {
         const sortedKeys = Object.keys(viewPositions).sort(
@@ -110,6 +90,18 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       [populateData, fixedHeaderHeight, headerCollapsed]
     );
 
+    const context = useMemo(() => {
+      return {
+        collapse: () => collapsibleHandlers.current?.collapse(),
+        expand: () => collapsibleHandlers.current?.expand(),
+        scrollTo: (offset: number, animate?: boolean) =>
+          collapsibleHandlers.current?.scrollTo(offset, animate),
+        headerHeight,
+        scrollY,
+        headerCollapsed,
+      };
+    }, [scrollY, headerHeight, headerCollapsed]);
+
     const internalContext = useMemo(
       () => ({
         containerRef,
@@ -120,6 +112,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         firstPersistViewY,
         persitsViewTop,
         fixedHeaderHeight,
+        persistHeaderHeight,
+        contentMinHeight,
       }),
       [
         setCollapsibleHandlers,
@@ -129,6 +123,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         firstPersistViewY,
         persitsViewTop,
         fixedHeaderHeight,
+        persistHeaderHeight,
+        contentMinHeight,
       ]
     );
 
