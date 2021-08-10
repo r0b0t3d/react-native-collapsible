@@ -78,5 +78,6 @@ export default function PersistView({ children, style }: Props) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
+    zIndex: 10,
   },
 });
