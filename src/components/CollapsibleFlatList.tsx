@@ -28,7 +28,7 @@ export default function CollapsibleFlatList<Data>({
   const [internalContentMinHeight, setInternalContentMinHeight] = useState(
     contentMinHeight.value
   );
-  const mounted = useRef(false);
+  const mounted = useRef(true);
 
   useEffect(() => {
     return () => {
