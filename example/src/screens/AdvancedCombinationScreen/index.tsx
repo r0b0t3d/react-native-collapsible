@@ -3,7 +3,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   CollapsibleContainer,
   CollapsibleHeaderContainer,
-  PersistView,
+  StickyView,
   withCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
 import FlatListTab from './FlatListTab';
@@ -28,7 +28,7 @@ function AdvancedCombinationScreen() {
             // @ts-ignore
             pointerEvents="none"
           />
-          <PersistView>
+          <StickyView>
             <View style={styles.tabsContainer}>
               <TouchableOpacity
                 style={[
@@ -50,7 +50,7 @@ function AdvancedCombinationScreen() {
                 <Text>ScrollView</Text>
               </TouchableOpacity>
             </View>
-          </PersistView>
+          </StickyView>
         </View>
       </CollapsibleHeaderContainer>
       {currentTab === Tabs.FlatList && <FlatListTab />}

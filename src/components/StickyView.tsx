@@ -15,18 +15,18 @@ type Props = {
   children: Element;
 };
 
-let persistKey = 0;
+let stickyKey = 0;
 
-export default function PersistView({ children, style }: Props) {
-  const key = useMemo(() => `persist_${persistKey++}`, []);
+export default function StickyView({ children, style }: Props) {
+  const key = useMemo(() => `sticky_${stickyKey++}`, []);
   const viewRef = useRef<View>(null);
-  const { containerRef, handlePersistViewLayout, persitsViewTop } =
+  const { containerRef, handleStickyViewLayout, stickyViewTops } =
     useInternalCollapsibleContext();
   const { scrollY } = useCollapsibleContext();
   const layoutValues = useSharedValue({ top: 0, height: 0 });
 
   useEffect(() => {
-    return () => handlePersistViewLayout(key, undefined);
+    return () => handleStickyViewLayout(key, undefined);
   }, []);
 
   const handleLayout = useCallback(() => {
@@ -35,16 +35,16 @@ export default function PersistView({ children, style }: Props) {
         // @ts-ignore
         containerRef.current,
         (left, top, width, height) => {
-          handlePersistViewLayout(key, { left, top, width, height });
+          handleStickyViewLayout(key, { left, top, width, height });
           layoutValues.value = { top, height };
         },
         () => {}
       );
     }
-  }, [handlePersistViewLayout]);
+  }, [handleStickyViewLayout]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const top = persitsViewTop.value[key] || 0;
+    const top = stickyViewTops.value[key] || 0;
     const inputMid = layoutValues.value.top - top;
     const translateY = interpolate(
       scrollY.value,
@@ -59,7 +59,7 @@ export default function PersistView({ children, style }: Props) {
         },
       ],
     };
-  }, [persitsViewTop, layoutValues, scrollY]);
+  }, [stickyViewTops, layoutValues, scrollY]);
 
   return (
     <Animated.View

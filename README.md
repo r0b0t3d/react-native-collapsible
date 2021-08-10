@@ -37,7 +37,6 @@ const MyComponent = () => {
             <CollapsibleFlatList
                 data={data}
                 renderItem={renderItem}
-                persistHeaderHeight={55}
             />
         </View>
     )

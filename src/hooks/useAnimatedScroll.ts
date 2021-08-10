@@ -25,10 +25,10 @@ export default function useAnimatedScroll({
   const { scrollY, headerCollapsed } = useCollapsibleContext();
   const {
     setCollapsibleHandlers,
-    firstPersistViewY,
+    firstStickyViewY,
     fixedHeaderHeight,
     containerHeight,
-    persistHeaderHeight,
+    stickyHeaderHeight,
     contentMinHeight,
   } = useInternalCollapsibleContext();
 
@@ -39,8 +39,8 @@ export default function useAnimatedScroll({
   }, []);
 
   const collapse = useCallback(() => {
-    scrollTo(Math.min(fixedHeaderHeight.value, firstPersistViewY.value));
-  }, [scrollTo, fixedHeaderHeight, firstPersistViewY]);
+    scrollTo(Math.min(fixedHeaderHeight.value, firstStickyViewY.value));
+  }, [scrollTo, fixedHeaderHeight, firstStickyViewY]);
 
   const expand = useCallback(() => scrollTo(0), [scrollTo]);
 
@@ -63,8 +63,8 @@ export default function useAnimatedScroll({
       onEndDrag: () => {
         if (!headerSnappable) return;
         const maxY =
-          firstPersistViewY.value > 0
-            ? firstPersistViewY.value
+          firstStickyViewY.value > 0
+            ? firstStickyViewY.value
             : fixedHeaderHeight.value;
 
         if (scrollY.value < maxY) {
@@ -79,11 +79,11 @@ export default function useAnimatedScroll({
         }
       },
     },
-    [scrollTo, fixedHeaderHeight, headerSnappable, firstPersistViewY]
+    [scrollTo, fixedHeaderHeight, headerSnappable, firstStickyViewY]
   );
 
   useDerivedValue(() => {
-    const maxY = fixedHeaderHeight.value - firstPersistViewY.value;
+    const maxY = fixedHeaderHeight.value - firstStickyViewY.value;
     const isCollapsed = scrollY.value >= maxY;
     headerCollapsed.value = isCollapsed;
   }, []);
@@ -95,7 +95,7 @@ export default function useAnimatedScroll({
     const newContentHeight =
       containerHeight.value +
       fixedHeaderHeight.value -
-      persistHeaderHeight.value;
+      stickyHeaderHeight.value;
     contentMinHeight.value = newContentHeight;
   }, []);
 

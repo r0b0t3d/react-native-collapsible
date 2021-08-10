@@ -1,7 +1,7 @@
 import {
   CollapsibleFlatList,
   CollapsibleHeaderContainer,
-  PersistView,
+  StickyView,
 } from '@r0b0t3d/react-native-collapsible';
 import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
@@ -23,11 +23,11 @@ export default function FlatListTab({}: Props) {
     <>
       <CollapsibleHeaderContainer>
         <View style={styles.banner} />
-        <PersistView>
+        <StickyView>
           <View style={styles.searchBox}>
             <TextInput placeholder="search" />
           </View>
-        </PersistView>
+        </StickyView>
       </CollapsibleHeaderContainer>
       <CollapsibleFlatList data={data} renderItem={renderItem} />
     </>

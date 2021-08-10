@@ -6,5 +6,5 @@ export { default as CollapsibleFlatList } from './components/CollapsibleFlatList
 export { default as CollapsibleScrollView } from './components/CollapsibleScrollView';
 export { default as CollapsibleHeaderContainer } from './components/CollapsibleHeaderContainer';
 export { default as CollapsibleView } from './components/CollapsibleView';
-export { default as PersistView } from './components/PersistView';
+export { default as StickyView } from './components/StickyView';
 export * from './components/CollapsibleView';

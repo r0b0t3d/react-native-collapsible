@@ -24,12 +24,12 @@ export type LayoutParams = {
 export type CollapsibleContextInternalType = {
   containerHeight: Animated.SharedValue<number>;
   containerRef: React.RefObject<View>;
-  firstPersistViewY: Animated.SharedValue<number>;
-  persitsViewTop: Animated.SharedValue<Record<string, number>>;
+  firstStickyViewY: Animated.SharedValue<number>;
+  stickyViewTops: Animated.SharedValue<Record<string, number>>;
   fixedHeaderHeight: Animated.SharedValue<number>;
-  persistHeaderHeight: Animated.SharedValue<number>;
+  stickyHeaderHeight: Animated.SharedValue<number>;
   contentMinHeight: Animated.SharedValue<number>;
-  handlePersistViewLayout: (viewKey: string, layout?: LayoutParams) => void;
+  handleStickyViewLayout: (viewKey: string, layout?: LayoutParams) => void;
   handleHeaderContainerLayout: (viewKey: string, height?: number) => void;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;
 };
