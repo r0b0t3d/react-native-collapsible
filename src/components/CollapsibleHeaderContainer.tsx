@@ -86,9 +86,15 @@ export default function CollapsibleHeaderContainer({
     };
   }, [headerHeight, fixedHeaderHeight, headerTranslate]);
 
+  const internalStyle = useMemo(() => {
+    return {
+      zIndex: 100000 - key,
+    };
+  }, []);
+
   return (
     <Animated.View
-      style={[styles.topView, headerStyle, { zIndex: 100000 - key }]}
+      style={[styles.container, headerStyle, internalStyle]}
       pointerEvents="box-none"
     >
       <View
@@ -104,5 +110,7 @@ export default function CollapsibleHeaderContainer({
 }
 
 const styles = StyleSheet.create({
-  topView: {},
+  container: {
+    backgroundColor: 'white',
+  },
 });
