@@ -1,6 +1,6 @@
 {
   "name": "@r0b0t3d/react-native-collapsible",
-  "version": "1.0.0-alpha.5",
+  "version": "1.0.0-alpha.6",
   "description": "Fully customizable collapsible views",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
