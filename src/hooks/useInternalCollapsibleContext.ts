@@ -8,7 +8,7 @@ export const InternalCollapsibleContext =
 export function useInternalCollapsibleContext() {
   const ctx = useContext(InternalCollapsibleContext);
   if (!ctx) {
-    console.log('Component should be rendered inside CollapsibleContainer');
+    throw new Error('Component should be wrapped with withCollapsibleContext');
   }
   return ctx;
 }
