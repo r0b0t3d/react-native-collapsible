@@ -19,16 +19,8 @@ export default function Home({}: Props) {
   return (
     <View style={styles.container}>
       <MenuItem
-        title={'CollapsibleFlatList'}
-        onPress={navigate('CollapsibleFlatListScreen')}
-      />
-      <MenuItem
-        title={'CollapsibleScrollView'}
-        onPress={navigate('CollapsibleScrollViewScreen')}
-      />
-      <MenuItem
-        title={'Advanced combination'}
-        onPress={navigate('AdvancedCombinationScreen')}
+        title={'CollapsibleList'}
+        onPress={navigate('CollapsibleList')}
       />
       <MenuItem
         title={'CollapsibleView'}
@@ -41,6 +33,7 @@ export default function Home({}: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 50,
   },
   box: {
     width: 60,
