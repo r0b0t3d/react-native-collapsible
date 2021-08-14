@@ -7,14 +7,15 @@ type Props = ViewProps & {
 };
 
 export default function CollapsibleContainer({ children, ...props }: Props) {
-  const { containerRef, containerHeight } = useInternalCollapsibleContext();
+  const { containerRef, handleContainerHeight } =
+    useInternalCollapsibleContext();
 
   const handleContainerLayout = useCallback(
     (layout: LayoutChangeEvent) => {
       const height = layout.nativeEvent.layout.height;
-      containerHeight.value = height;
+      handleContainerHeight(height);
     },
-    [containerHeight]
+    [handleContainerHeight]
   );
 
   return (

@@ -10,8 +10,8 @@ import Animated, { runOnJS, useDerivedValue } from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 import type { CollapsibleProps } from '../types';
+import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -25,10 +25,8 @@ export default function CollapsibleFlatList<Data>({
   const scrollView = useRef<FlatList>(null);
   const { headerHeight } = useCollapsibleContext();
   const { contentMinHeight } = useInternalCollapsibleContext();
-  const [internalContentMinHeight, setInternalContentMinHeight] = useState(
-    contentMinHeight.value
-  );
   const mounted = useRef(true);
+  const contentHeight = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -54,11 +52,18 @@ export default function CollapsibleFlatList<Data>({
     scrollTo,
   });
 
+  const [internalContentMinHeight, setInternalContentMinHeight] = useState(
+    contentMinHeight.value
+  );
+
   useDerivedValue(() => {
-    if (contentMinHeight.value !== internalContentMinHeight) {
+    if (
+      contentHeight.current < contentMinHeight.value &&
+      contentMinHeight.value !== internalContentMinHeight
+    ) {
       runOnJS(handleInternalContentHeight)(contentMinHeight.value);
     }
-  }, [internalContentMinHeight]);
+  }, [internalContentMinHeight, contentHeight.current]);
 
   const contentContainerStyle = useMemo(
     () => [
@@ -68,6 +73,10 @@ export default function CollapsibleFlatList<Data>({
     ],
     [props.contentContainerStyle, internalContentMinHeight]
   );
+
+  const handleContentSizeChange = useCallback((_, height) => {
+    contentHeight.current = height;
+  }, []);
 
   const renderListHeader = () => (
     <View>
@@ -89,6 +98,7 @@ export default function CollapsibleFlatList<Data>({
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
+      onContentSizeChange={handleContentSizeChange}
     />
   );
 }

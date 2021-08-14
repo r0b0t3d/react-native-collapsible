@@ -10,7 +10,7 @@ import Top100Tab from './components/Top100Tab';
 import AlbumsTab from './components/AlbumsTab';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-function AdvancedCombinationScreen() {
+function CollapsibleList() {
   const [currentTab, setCurrentTab] = useState(0);
   const { top } = useSafeAreaInsets();
 
@@ -68,7 +68,7 @@ function AdvancedCombinationScreen() {
   );
 }
 
-export default withCollapsibleContext(AdvancedCombinationScreen);
+export default withCollapsibleContext(CollapsibleList);
 
 const styles = StyleSheet.create({
   container: {

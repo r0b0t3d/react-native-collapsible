@@ -2,6 +2,7 @@ import {
   CollapsibleFlatList,
   CollapsibleHeaderContainer,
   StickyView,
+  useCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
 import React, { useCallback, useMemo } from 'react';
 import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -9,6 +10,7 @@ import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 type Props = {};
 
 export default function Top100Tab({}: Props) {
+  const { collapse } = useCollapsibleContext();
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
 
   const renderItem = useCallback(({ index }) => {
@@ -31,7 +33,11 @@ export default function Top100Tab({}: Props) {
       <CollapsibleHeaderContainer>
         <StickyView>
           <View style={styles.searchBox}>
-            <TextInput placeholder="Looking for..." style={styles.search} />
+            <TextInput
+              placeholder="Looking for..."
+              style={styles.search}
+              onFocus={collapse}
+            />
           </View>
         </StickyView>
       </CollapsibleHeaderContainer>

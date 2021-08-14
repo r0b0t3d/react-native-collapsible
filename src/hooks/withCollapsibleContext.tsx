@@ -10,61 +10,76 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
     const collapsibleHandlers = useRef<CollapsibleHandles>();
     const headerHeight = useSharedValue(0);
-    const fixedHeaderHeight = useSharedValue(0);
     const scrollY = useSharedValue(0);
-    const stickyHeaderHeight = useSharedValue(0);
     const headerCollapsed = useSharedValue(false);
     const contentMinHeight = useSharedValue(0);
-    const containerHeight = useSharedValue(0);
-    const firstStickyViewY = useSharedValue(1000000);
-    const headerContainersHeight = useRef<Record<string, number>>({});
     const stickyViewTops = useSharedValue<Record<string, number>>({});
-    const StickyViewPositions = useRef<Record<string, LayoutParams>>({});
+    const stickyHeaderHeight = useRef(0);
+    const containerHeight = useRef(0);
+    const firstStickyViewY = useRef(1000000);
+    const fixedHeaderHeight = useRef(0);
+    const headerContainersHeight = useRef<Record<string, number>>({});
+    const stickyViewPositions = useRef<Record<string, LayoutParams>>({});
     const containerRef = useRef<View>(null);
 
     const setCollapsibleHandlers = useCallback((handlers) => {
       collapsibleHandlers.current = handlers;
     }, []);
 
-    const populateData = useCallback(
-      (viewPositions: any, headerHeight: number) => {
-        const sortedKeys = Object.keys(viewPositions).sort(
-          (a, b) => viewPositions[a].top - viewPositions[b].top
-        );
-        let totalTop = 0;
-        const values: any = {};
-        for (let i = 0; i < sortedKeys.length; i++) {
-          values[sortedKeys[i]] = totalTop;
-          // Try minus 1 make it filled when scrolling up.
-          // Otherwise, we can see a small space between the persits views
-          totalTop += viewPositions[sortedKeys[i]].height - 1;
+    const refreshHeaderCollapsed = useCallback(() => {
+      const maxY = fixedHeaderHeight.current - firstStickyViewY.current;
+      const isCollapsed = scrollY.value >= maxY;
+      headerCollapsed.value = isCollapsed;
+    }, []);
+
+    const refreshMinContentHeight = useCallback(() => {
+      contentMinHeight.value =
+        containerHeight.current +
+        fixedHeaderHeight.current -
+        stickyHeaderHeight.current;
+    }, []);
+
+    const populateData = useCallback(() => {
+      const viewPositions = stickyViewPositions.current;
+      const headerHeight = fixedHeaderHeight.current;
+
+      const sortedKeys = Object.keys(viewPositions).sort(
+        (a, b) => viewPositions[a].top - viewPositions[b].top
+      );
+      let totalTop = 0;
+      const values: any = {};
+      for (let i = 0; i < sortedKeys.length; i++) {
+        values[sortedKeys[i]] = totalTop;
+        // Try minus 1 make it filled when scrolling up.
+        // Otherwise, we can see a small space between the persits views
+        totalTop += viewPositions[sortedKeys[i]].height - 1;
+      }
+      stickyViewTops.value = values;
+      firstStickyViewY.current = viewPositions[sortedKeys[0]]?.top || 0;
+      refreshHeaderCollapsed();
+      const stickyHeader = sortedKeys.reduce((acc, key) => {
+        const data = viewPositions[key];
+        const isInsideHeader = data.top < headerHeight;
+        if (isInsideHeader) {
+          return acc + data.height;
         }
-        stickyViewTops.value = values;
-        firstStickyViewY.value = viewPositions[sortedKeys[0]]?.top || 0;
-        const stickyHeader = sortedKeys.reduce((acc, key) => {
-          const data = viewPositions[key];
-          const isInsideHeader = data.top < headerHeight;
-          if (isInsideHeader) {
-            return acc + data.height;
-          }
-          return acc;
-        }, 0);
-        stickyHeaderHeight.value = stickyHeader;
-      },
-      []
-    );
+        return acc;
+      }, 0);
+      stickyHeaderHeight.current = stickyHeader;
+      refreshMinContentHeight();
+    }, [stickyViewPositions.current, fixedHeaderHeight.current]);
 
     const handleStickyViewLayout = useCallback(
       (viewKey: string, layout?: LayoutParams) => {
         if (!layout) {
-          delete StickyViewPositions.current[viewKey];
+          delete stickyViewPositions.current[viewKey];
         } else {
-          StickyViewPositions.current = {
-            ...StickyViewPositions.current,
+          stickyViewPositions.current = {
+            ...stickyViewPositions.current,
             [viewKey]: layout,
           };
         }
-        populateData(StickyViewPositions.current, fixedHeaderHeight.value);
+        populateData();
       },
       [populateData, fixedHeaderHeight]
     );
@@ -81,13 +96,23 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
           0
         );
         headerHeight.value = withTiming(totalHeight, {
-          duration:
-            fixedHeaderHeight.value === 0 || headerCollapsed.value ? 0 : 200,
+          duration: fixedHeaderHeight.current === 0 ? 0 : 200,
         });
-        fixedHeaderHeight.value = totalHeight;
-        populateData(StickyViewPositions.current, totalHeight);
+        fixedHeaderHeight.current = totalHeight;
+
+        populateData();
+        refreshHeaderCollapsed();
+        refreshMinContentHeight();
       },
-      [populateData, fixedHeaderHeight, headerCollapsed]
+      [populateData, refreshHeaderCollapsed, refreshMinContentHeight]
+    );
+
+    const handleContainerHeight = useCallback(
+      (height: number) => {
+        containerHeight.current = height;
+        refreshMinContentHeight();
+      },
+      [refreshMinContentHeight]
     );
 
     const context = useMemo(() => {
@@ -108,7 +133,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         handleStickyViewLayout,
         handleHeaderContainerLayout,
         setCollapsibleHandlers,
-        containerHeight,
+        handleContainerHeight,
         firstStickyViewY,
         stickyViewTops,
         fixedHeaderHeight,
@@ -119,7 +144,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         setCollapsibleHandlers,
         handleStickyViewLayout,
         handleHeaderContainerLayout,
-        containerHeight,
+        handleContainerHeight,
         firstStickyViewY,
         stickyViewTops,
         fixedHeaderHeight,

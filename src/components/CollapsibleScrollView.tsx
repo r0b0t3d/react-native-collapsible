@@ -18,8 +18,8 @@ export default function CollapsibleScrollView({
   ...props
 }: Props) {
   const scrollView = useRef<Animated.ScrollView>(null);
-  const { headerHeight } = useCollapsibleContext();
   const { contentMinHeight } = useInternalCollapsibleContext();
+  const { headerHeight } = useCollapsibleContext();
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
     // @ts-ignore
