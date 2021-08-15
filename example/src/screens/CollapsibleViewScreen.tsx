@@ -20,7 +20,7 @@ export default function CollapsibleViewScreen({}: Props) {
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, paddingTop: 80 }}>
       <CollapsibleView
         renderHeader={renderHeader}
         containerStyle={styles.container}

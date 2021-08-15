@@ -1,4 +1,6 @@
-import React, { ReactNode, useCallback, useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
+import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
   StyleProp,
@@ -9,10 +11,11 @@ import {
 import Animated, {
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
+import useCollapsibleContext from '../hooks/useCollapsibleContext';
 
 type Props = {
   children: ReactNode;
@@ -25,10 +28,14 @@ export default function CollapsibleHeaderContainer({
   children,
   containerStyle,
 }: Props) {
-  const [contentKey] = useState(key++);
-  const { scrollY, headerHeight, persistHeaderHeight } =
-    useCollapsibleContext();
-  const headerContentReady = useSharedValue(false);
+  const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
+  const { scrollY } = useCollapsibleContext();
+  const { handleHeaderContainerLayout } = useInternalCollapsibleContext();
+  const headerHeight = useSharedValue(0);
+
+  useEffect(() => {
+    return () => handleHeaderContainerLayout(contentKey, undefined);
+  }, []);
 
   const handleHeaderLayout = useCallback(
     ({
@@ -37,36 +44,45 @@ export default function CollapsibleHeaderContainer({
       },
     }: LayoutChangeEvent) => {
       headerHeight.value = withTiming(height, {
-        duration: !headerContentReady.value ? 0 : 200,
+        duration: 200,
       });
-      headerContentReady.value = true;
+      handleHeaderContainerLayout(contentKey, height);
     },
-    [headerHeight, headerContentReady]
+    [contentKey, handleHeaderContainerLayout]
+  );
+
+  const headerTranslate = useDerivedValue(
+    () =>
+      interpolate(
+        scrollY.value,
+        // FIXME: can improve by geting maxY value of header and sticky views
+        [-250, 0, 100000],
+        [250, 0, -100000],
+        Animated.Extrapolate.CLAMP
+      ),
+    []
   );
 
   const headerStyle = useAnimatedStyle(() => {
-    if (!headerContentReady.value) {
-      return {};
-    }
-    const headerTranslate = interpolate(
-      scrollY.value,
-      [0, headerHeight.value - persistHeaderHeight.value],
-      [0, -headerHeight.value + persistHeaderHeight.value],
-      Animated.Extrapolate.CLAMP
-    );
     return {
-      transform: [{ translateY: headerTranslate }],
+      transform: [{ translateY: headerTranslate.value }],
       minHeight: headerHeight.value,
     };
-  }, [persistHeaderHeight, headerHeight, headerContentReady]);
+  }, [headerHeight, headerTranslate]);
+
+  const internalStyle = useMemo(() => {
+    return {
+      zIndex: 100000 - key,
+    };
+  }, []);
 
   return (
     <Animated.View
-      style={[styles.topView, headerStyle]}
+      style={[styles.container, headerStyle, internalStyle]}
       pointerEvents="box-none"
     >
       <View
-        key={`collapsible-flatlist-${contentKey}`}
+        key={contentKey}
         onLayout={handleHeaderLayout}
         pointerEvents="box-none"
         style={containerStyle}
@@ -78,11 +94,7 @@ export default function CollapsibleHeaderContainer({
 }
 
 const styles = StyleSheet.create({
-  topView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
+  container: {
+    backgroundColor: 'white',
   },
 });

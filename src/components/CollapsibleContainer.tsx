@@ -1,67 +1,38 @@
-import React, { FC, ReactNode, useCallback, useMemo, useRef } from 'react';
-import type { CollapsibleHandles } from '../types';
-import { CollapsibleContext } from '../hooks/useCollapsibleContext';
-import { InternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
-import { useSharedValue } from 'react-native-reanimated';
+import React, { useCallback } from 'react';
+import { LayoutChangeEvent, StyleSheet, View, ViewProps } from 'react-native';
+import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 
-type Props = {
-  children: ReactNode;
+type Props = ViewProps & {
+  children: Element;
 };
 
-function CollapsibleContainer({ children }: Props) {
-  const collapsibleHandlers = useRef<CollapsibleHandles>();
-  const headerHeight = useSharedValue(0);
-  const scrollY = useSharedValue(0);
-  const persistHeaderHeight = useSharedValue(0);
-  const headerCollapsed = useSharedValue(false);
-  const contentMinHeight = useSharedValue(0);
+export default function CollapsibleContainer({ children, ...props }: Props) {
+  const { containerRef, handleContainerHeight } =
+    useInternalCollapsibleContext();
 
-  const setCollapsibleHandlers = useCallback((handlers) => {
-    collapsibleHandlers.current = handlers;
-  }, []);
-
-  const context = useMemo(() => {
-    return {
-      collapse: () => collapsibleHandlers.current?.collapse(),
-      expand: () => collapsibleHandlers.current?.expand(),
-      scrollTo: (offset: number, animate?: boolean) =>
-        collapsibleHandlers.current?.scrollTo(offset, animate),
-      headerHeight,
-      scrollY,
-      persistHeaderHeight,
-      headerCollapsed,
-      contentMinHeight,
-    };
-  }, [
-    persistHeaderHeight,
-    scrollY,
-    headerHeight,
-    headerCollapsed,
-    contentMinHeight,
-  ]);
-
-  const internalContext = useMemo(
-    () => ({
-      setCollapsibleHandlers,
-    }),
-    [setCollapsibleHandlers]
+  const handleContainerLayout = useCallback(
+    (layout: LayoutChangeEvent) => {
+      const height = layout.nativeEvent.layout.height;
+      handleContainerHeight(height);
+    },
+    [handleContainerHeight]
   );
 
   return (
-    <CollapsibleContext.Provider value={context}>
-      <InternalCollapsibleContext.Provider value={internalContext}>
-        {children}
-      </InternalCollapsibleContext.Provider>
-    </CollapsibleContext.Provider>
+    <View
+      ref={containerRef}
+      style={styles.container}
+      onLayout={handleContainerLayout}
+      {...props}
+    >
+      {children}
+    </View>
   );
 }
 
-export default function withCollapsibleContext<T>(Component: FC<T>) {
-  return (props: T) => {
-    return (
-      <CollapsibleContainer>
-        <Component {...props} />
-      </CollapsibleContainer>
-    );
-  };
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+});

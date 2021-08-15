@@ -4,7 +4,8 @@ import React, { ReactNode, useCallback, useMemo, useRef } from 'react';
 import { ScrollViewProps, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { CollapsibleProps } from '../types';
-import { useCollapsibleContext } from '../hooks/useCollapsibleContext';
+import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 
 type Props = ScrollViewProps &
   CollapsibleProps & {
@@ -12,21 +13,20 @@ type Props = ScrollViewProps &
   };
 
 export default function CollapsibleScrollView({
-  persistHeaderHeight = 0,
   headerSnappable = true,
   children,
   ...props
 }: Props) {
   const scrollView = useRef<Animated.ScrollView>(null);
-  const { headerHeight, contentMinHeight } = useCollapsibleContext();
+  const { contentMinHeight } = useInternalCollapsibleContext();
+  const { headerHeight } = useCollapsibleContext();
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
     // @ts-ignore
     scrollView.current?.scrollTo({ y: yValue, animated });
   }, []);
 
-  const { scrollHandler, handleContainerLayout } = useAnimatedScroll({
-    persistHeaderHeight,
+  const { scrollHandler } = useAnimatedScroll({
     headerSnappable,
     scrollTo,
   });
@@ -47,12 +47,12 @@ export default function CollapsibleScrollView({
       ref={scrollView}
       bounces={false}
       {...props}
+      style={[styles.container, props.style]}
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
       scrollEventThrottle={16}
-      onLayout={handleContainerLayout}
     >
       <Animated.View style={animatedStyle}>
         <AnimatedTopView height={headerHeight} />
@@ -63,9 +63,11 @@ export default function CollapsibleScrollView({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+  },
   contentContainer: {
     flexGrow: 1,
-    paddingBottom: 100,
   },
   topView: {
     position: 'absolute',
