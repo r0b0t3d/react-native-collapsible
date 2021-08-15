@@ -12,6 +12,12 @@ yarn add @r0b0t3d/react-native-collapsible
 
 I am using `reanimated 2` for animation. So you should install and follow instruction here to setup your project [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/docs/installation)
 
+## Key features
+1️⃣ Support FlatList/ScrollView
+2️⃣ Support sticky header
+3️⃣ Can have multiple sticky headers
+4️⃣ Easy to customize
+
 ## Usage
 ### 1. Basic
 ```jsx
@@ -40,7 +46,7 @@ const MyComponent = () => {
       <CollapsibleFlatList          // 4️⃣ (Required) Your FlatList/ScrollView
         data={data}
         renderItem={renderItem}
-        headerSnapalbe={false} // <-- should header auto snap when you release the finger
+        headerSnappable={false} // <-- should header auto snap when you release the finger
       />
     </CollapsibleContainer>
   )
