@@ -103,9 +103,9 @@ const FirstTab = () => {
 }
 ```
 
-## Show cases
+## Showcases
 ```
-Note: Feel free to add your show case here by a PR
+Note: Feel free to add your showcase here by a PR
 ```
 | App         | Gif         |
 | ----------- | ----------- |
