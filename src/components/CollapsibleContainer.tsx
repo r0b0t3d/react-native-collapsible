@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewProps } from 'react-native';
 import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 
-type Props = ViewProps & {
+type Props = Omit<ViewProps, 'ref' | 'onLayout'> & {
   children: Element;
 };
 
@@ -20,10 +20,10 @@ export default function CollapsibleContainer({ children, ...props }: Props) {
 
   return (
     <View
-      ref={containerRef}
-      style={styles.container}
-      onLayout={handleContainerLayout}
       {...props}
+      ref={containerRef}
+      style={[styles.container, props.style]}
+      onLayout={handleContainerLayout}
     >
       {children}
     </View>
