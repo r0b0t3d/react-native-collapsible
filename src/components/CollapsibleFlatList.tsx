@@ -6,7 +6,10 @@ import React, {
   useState,
 } from 'react';
 import { FlatListProps, FlatList, View, StyleSheet } from 'react-native';
-import Animated, { runOnJS, useDerivedValue } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+} from 'react-native-reanimated';
 import AnimatedTopView from './AnimatedTopView';
 import useAnimatedScroll from '../hooks/useAnimatedScroll';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
@@ -56,14 +59,21 @@ export default function CollapsibleFlatList<Data>({
     contentMinHeight.value
   );
 
-  useDerivedValue(() => {
-    if (
-      contentHeight.current < contentMinHeight.value &&
-      contentMinHeight.value !== internalContentMinHeight
-    ) {
-      runOnJS(handleInternalContentHeight)(contentMinHeight.value);
+  useAnimatedReaction(
+    () => {
+      return contentMinHeight.value;
+    },
+    (result, previous) => {
+      if (result !== previous) {
+        if (
+          contentHeight.current < contentMinHeight.value &&
+          internalContentMinHeight !== contentMinHeight.value
+        ) {
+          runOnJS(handleInternalContentHeight)(contentMinHeight.value);
+        }
+      }
     }
-  }, [internalContentMinHeight, contentHeight.current]);
+  );
 
   const contentContainerStyle = useMemo(
     () => [

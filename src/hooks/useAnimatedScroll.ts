@@ -33,9 +33,9 @@ export default function useAnimatedScroll({
 
   const collapse = useCallback(() => {
     scrollTo(
-      Math.min(fixedHeaderHeight.current || 0, firstStickyViewY.current || 0)
+      Math.min(fixedHeaderHeight.value || 0, firstStickyViewY.value || 0)
     );
-  }, [scrollTo, fixedHeaderHeight.current, firstStickyViewY.current]);
+  }, [scrollTo]);
 
   const expand = useCallback(() => scrollTo(0), [scrollTo]);
 
@@ -58,9 +58,9 @@ export default function useAnimatedScroll({
       onEndDrag: () => {
         if (!headerSnappable) return;
         const maxY =
-          firstStickyViewY.current && firstStickyViewY.current > 0
-            ? firstStickyViewY.current
-            : fixedHeaderHeight.current || 0;
+          firstStickyViewY.value && firstStickyViewY.value > 0
+            ? firstStickyViewY.value
+            : fixedHeaderHeight.value || 0;
 
         if (scrollY.value < maxY) {
           const delta = Math.abs(scrollY.value - maxY);
@@ -74,7 +74,7 @@ export default function useAnimatedScroll({
         }
       },
     },
-    [firstStickyViewY.current, fixedHeaderHeight.current]
+    [scrollTo]
   );
 
   return {

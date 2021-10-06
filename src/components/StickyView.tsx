@@ -7,7 +7,7 @@ import Animated, {
   Extrapolate,
   interpolate,
   useAnimatedStyle,
-  useSharedValue,
+  useDerivedValue,
 } from 'react-native-reanimated';
 
 type Props = {
@@ -20,46 +20,39 @@ let stickyKey = 0;
 export default function StickyView({ children, style }: Props) {
   const key = useMemo(() => `sticky_${stickyKey++}`, []);
   const viewRef = useRef<View>(null);
-  const { containerRef, handleStickyViewLayout, stickyViewTops } =
+  const { handleStickyViewLayout, stickyViewTops, stickyViewPositions } =
     useInternalCollapsibleContext();
   const { scrollY } = useCollapsibleContext();
-  const layoutValues = useSharedValue({ top: 0, height: 0 });
 
   useEffect(() => {
     return () => handleStickyViewLayout(key, undefined);
   }, []);
 
   const handleLayout = useCallback(() => {
-    if (viewRef.current && containerRef.current) {
-      viewRef.current.measureLayout(
-        // @ts-ignore
-        containerRef.current,
-        (left, top, width, height) => {
-          handleStickyViewLayout(key, { left, top, width, height });
-          layoutValues.value = { top, height };
-        },
-        () => {}
-      );
-    }
-  }, [handleStickyViewLayout]);
+    handleStickyViewLayout(key, viewRef);
+  }, [handleStickyViewLayout, key]);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const translateY = useDerivedValue(() => {
     const top = stickyViewTops.value[key] || 0;
-    const inputMid = layoutValues.value.top - top;
-    const translateY = interpolate(
+    const layoutValues = stickyViewPositions.value[key] || { top: 0 };
+    const inputMid = layoutValues.top - top;
+    return interpolate(
       scrollY.value,
       [0, inputMid, inputMid + 100000],
       [0, 0, 100000],
       Extrapolate.CLAMP
     );
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          translateY: translateY,
+          translateY: translateY.value,
         },
       ],
     };
-  }, [stickyViewTops, layoutValues, scrollY]);
+  }, []);
 
   return (
     <Animated.View

@@ -63,7 +63,7 @@ export default function CollapsibleView({
   }, []);
 
   const handleLayout = useCallback((event: LayoutChangeEvent) => {
-    if (event.nativeEvent.layout.height > 0) {
+    if (event.nativeEvent.layout.height >= 0) {
       actualHeight.value = event.nativeEvent.layout.height;
     }
   }, []);
@@ -142,7 +142,7 @@ export function CollapsibleHeaderText({
   iconInitialAngle = 0,
   children,
 }: {
-  title: string;
+  title: string | Element;
   style?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<TextStyle>;
   icon?: ReactNode;
@@ -165,7 +165,7 @@ export function CollapsibleHeaderText({
   }, [iconInitialAngle]);
 
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onToggle} style={[style]}>
+    <TouchableOpacity activeOpacity={0.9} onPress={onToggle} style={style}>
       <View style={styles.headerContainer}>
         <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
         {icon && <Animated.View style={iconStyle}>{icon}</Animated.View>}
@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
   content: {},
   headerContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   headerTitle: {
     flex: 1,

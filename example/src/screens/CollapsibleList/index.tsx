@@ -3,6 +3,8 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import {
   CollapsibleContainer,
   CollapsibleHeaderContainer,
+  CollapsibleHeaderText,
+  CollapsibleView,
   StickyView,
   withCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
@@ -13,6 +15,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 function CollapsibleList() {
   const [currentTab, setCurrentTab] = useState(0);
   const { top } = useSafeAreaInsets();
+
+  function renderHeder(props: any) {
+    return <CollapsibleHeaderText title="Collapsible view" {...props} />;
+  }
 
   return (
     <View style={styles.container}>
@@ -30,6 +36,9 @@ function CollapsibleList() {
             />
             <Text style={styles.name}>Alan Walker</Text>
           </View>
+          <CollapsibleView renderHeader={renderHeder}>
+            <View style={styles.collapsibleView} />
+          </CollapsibleView>
           <StickyView style={{ paddingTop: top }}>
             <View style={styles.tabsContainer}>
               <TouchableOpacity
@@ -139,5 +148,9 @@ const styles = StyleSheet.create({
   },
   tabTitleSelected: {
     color: '#7339B3',
+  },
+  collapsibleView: {
+    height: 100,
+    backgroundColor: 'yellow',
   },
 });
