@@ -68,7 +68,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
           let totalTop = 0;
           const values: any = {};
           for (let i = 0; i < sortedKeys.length; i++) {
-            console.log(sortedKeys[i], viewPositions[sortedKeys[i]]);
             values[sortedKeys[i]] = totalTop;
             // Try minus 1 make it filled when scrolling up.
             // Otherwise, we can see a small space between the persits views
@@ -97,7 +96,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
             // @ts-ignore
             containerRef.current,
             (left, top, width, height) => {
-              console.log('refresh', viewKey);
               stickyViewPositionsRef.current = {
                 ...stickyViewPositionsRef.current,
                 [viewKey]: { left, top, width, height },
