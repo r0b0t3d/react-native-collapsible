@@ -3,6 +3,7 @@ import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleCo
 import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
+  Platform,
   StyleProp,
   StyleSheet,
   View,
@@ -78,14 +79,14 @@ export default function CollapsibleHeaderContainer({
 
   return (
     <Animated.View
-      style={[styles.container, headerStyle, internalStyle]}
+      style={[headerStyle, internalStyle]}
       pointerEvents="box-none"
     >
       <View
         key={contentKey}
         onLayout={handleHeaderLayout}
         pointerEvents="box-none"
-        style={containerStyle}
+        style={[styles.container, containerStyle]}
       >
         {children}
       </View>
@@ -96,5 +97,6 @@ export default function CollapsibleHeaderContainer({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
+    marginTop: Platform.OS === 'android' ? -1 : 0
   },
 });
