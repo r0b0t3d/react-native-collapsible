@@ -97,6 +97,6 @@ export default function CollapsibleHeaderContainer({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    marginTop: Platform.OS === 'android' ? -1 : 0
+    marginTop: Platform.OS === 'android' ? -1 : 0,
   },
 });
