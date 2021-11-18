@@ -40,3 +40,9 @@ export type CollapsibleContextInternalType = {
 export type CollapsibleProps = {
   headerSnappable?: boolean;
 };
+
+export type PullToRefreshContextType = {
+  translateY: Animated.SharedValue<number>;
+  scrollRef: React.RefObject<any>;
+  panRef: React.RefObject<any>;
+};

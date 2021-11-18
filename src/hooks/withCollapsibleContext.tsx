@@ -12,6 +12,7 @@ import {
 } from 'react-native-reanimated';
 import type { View } from 'react-native';
 import { debounce } from '../utils/debounce';
+import PullToRefreshContainer from '../components/PullToRefreshContainer';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
@@ -188,11 +189,13 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     );
 
     return (
-      <CollapsibleContext.Provider value={context}>
-        <InternalCollapsibleContext.Provider value={internalContext}>
-          <Component {...props} />
-        </InternalCollapsibleContext.Provider>
-      </CollapsibleContext.Provider>
+      <PullToRefreshContainer>
+        <CollapsibleContext.Provider value={context}>
+          <InternalCollapsibleContext.Provider value={internalContext}>
+            <Component {...props} />
+          </InternalCollapsibleContext.Provider>
+        </CollapsibleContext.Provider>
+      </PullToRefreshContainer>
     );
   };
 }

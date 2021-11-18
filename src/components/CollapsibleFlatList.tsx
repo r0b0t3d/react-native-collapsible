@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { FlatListProps, FlatList, View, StyleSheet } from 'react-native';
+import { FlatListProps, View, StyleSheet } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
@@ -15,6 +15,8 @@ import useAnimatedScroll from '../hooks/useAnimatedScroll';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
 import type { CollapsibleProps } from '../types';
 import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
+import usePullToRefreshContext from '../hooks/usePullToRefreshContext';
+import { FlatList } from 'react-native-gesture-handler';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -25,9 +27,9 @@ export default function CollapsibleFlatList<Data>({
   headerSnappable = true,
   ...props
 }: Props<Data>) {
-  const scrollView = useRef<FlatList>(null);
   const { headerHeight } = useCollapsibleContext();
   const { contentMinHeight } = useInternalCollapsibleContext();
+  const { scrollRef, panRef } = usePullToRefreshContext();
   const mounted = useRef(true);
   const contentHeight = useRef(0);
 
@@ -37,12 +39,15 @@ export default function CollapsibleFlatList<Data>({
     };
   }, []);
 
-  const scrollTo = useCallback((yValue: number, animated = true) => {
-    scrollView.current?.scrollToOffset({
-      offset: yValue,
-      animated,
-    });
-  }, []);
+  const scrollTo = useCallback(
+    (yValue: number, animated = true) => {
+      scrollRef.current?.scrollToOffset({
+        offset: yValue,
+        animated,
+      });
+    },
+    [scrollRef]
+  );
 
   const handleInternalContentHeight = useCallback((value: number) => {
     if (mounted.current) {
@@ -98,7 +103,7 @@ export default function CollapsibleFlatList<Data>({
   return (
     // @ts-ignore
     <AnimatedFlatList
-      ref={scrollView}
+      ref={scrollRef}
       bounces={false}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"

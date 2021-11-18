@@ -12,6 +12,12 @@ type Props = {};
 export default function Top100Tab({}: Props) {
   const { collapse } = useCollapsibleContext();
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
+  const [isLoading, setLoading] = React.useState(false);
+
+  const handleRefresh = useCallback(() => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 2000);
+  }, []);
 
   const renderItem = useCallback(({ index }) => {
     return (
@@ -45,6 +51,8 @@ export default function Top100Tab({}: Props) {
         data={data}
         renderItem={renderItem}
         contentContainerStyle={{ marginTop: 10 }}
+        refreshing={isLoading}
+        onRefresh={handleRefresh}
       />
     </>
   );
