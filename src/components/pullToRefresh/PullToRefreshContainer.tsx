@@ -3,7 +3,10 @@ import {
   PanGestureHandler,
 } from 'react-native-gesture-handler';
 import React, { useRef } from 'react';
-import Animated, { useAnimatedGestureHandler } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedGestureHandler,
+  withTiming,
+} from 'react-native-reanimated';
 import usePullToRefreshContext from './usePullToRefreshContext';
 import { StyleSheet } from 'react-native';
 import { rubberClamp } from './utils';
@@ -36,10 +39,9 @@ export default function PullToRefreshContainer({ children, scrollY }: Props) {
       }
     },
     onEnd: () => {
-      if (internalRefreshing.value) {
-        refreshValue.value = internalHeight.value;
-      } else {
-        refreshValue.value = 0;
+      if (refreshValue.value > 0) {
+        const value = internalRefreshing.value ? internalHeight.value : 0;
+        refreshValue.value = withTiming(value);
       }
     },
   });
