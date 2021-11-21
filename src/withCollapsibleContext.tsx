@@ -1,9 +1,9 @@
 /* eslint-disable no-shadow */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { FC, useCallback, useMemo, useRef } from 'react';
-import type { CollapsibleHandles, LayoutParams } from '../types';
-import { CollapsibleContext } from './useCollapsibleContext';
-import { InternalCollapsibleContext } from './useInternalCollapsibleContext';
+import type { CollapsibleHandles, LayoutParams } from './types';
+import { CollapsibleContext } from './hooks/useCollapsibleContext';
+import { InternalCollapsibleContext } from './hooks/useInternalCollapsibleContext';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -11,8 +11,8 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import type { View } from 'react-native';
-import { debounce } from '../utils/debounce';
-import PullToRefreshContainer from '../components/PullToRefreshContainer';
+import { debounce } from './utils/debounce';
+import PullToRefreshProvider from './components/pullToRefresh/PullToRefreshProvider';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
@@ -189,13 +189,13 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     );
 
     return (
-      <PullToRefreshContainer>
-        <CollapsibleContext.Provider value={context}>
-          <InternalCollapsibleContext.Provider value={internalContext}>
+      <CollapsibleContext.Provider value={context}>
+        <InternalCollapsibleContext.Provider value={internalContext}>
+          <PullToRefreshProvider>
             <Component {...props} />
-          </InternalCollapsibleContext.Provider>
-        </CollapsibleContext.Provider>
-      </PullToRefreshContainer>
+          </PullToRefreshProvider>
+        </InternalCollapsibleContext.Provider>
+      </CollapsibleContext.Provider>
     );
   };
 }

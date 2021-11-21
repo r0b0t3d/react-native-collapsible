@@ -1,11 +1,11 @@
-import AnimatedTopView from './AnimatedTopView';
-import useAnimatedScroll from '../hooks/useAnimatedScroll';
+import AnimatedTopView from '../header/AnimatedTopView';
+import useAnimatedScroll from './useAnimatedScroll';
 import React, { ReactNode, useCallback, useMemo, useRef } from 'react';
 import { ScrollViewProps, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
-import type { CollapsibleProps } from '../types';
-import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
+import type { CollapsibleProps } from '../../types';
+import useCollapsibleContext from '../../hooks/useCollapsibleContext';
+import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 
 type Props = ScrollViewProps &
   CollapsibleProps & {
@@ -52,7 +52,7 @@ export default function CollapsibleScrollView({
       onScroll={scrollHandler}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
-      scrollEventThrottle={16}
+      scrollEventThrottle={1}
     >
       <Animated.View style={animatedStyle}>
         <AnimatedTopView height={headerHeight} />

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { LayoutChangeEvent, StyleSheet, View, ViewProps } from 'react-native';
-import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
+import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
 
 type Props = Omit<ViewProps, 'ref' | 'onLayout'> & {
   children: Element;

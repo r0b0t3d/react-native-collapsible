@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import type { PullToRefreshContextType } from '../types';
+import type { PullToRefreshContextType } from '../../types';
 
 // @ts-ignore
 export const PullToRefreshContext = createContext<PullToRefreshContextType>({});

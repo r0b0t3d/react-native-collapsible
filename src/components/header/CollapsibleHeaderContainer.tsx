@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
+import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
@@ -16,7 +16,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 
 type Props = {
   children: ReactNode;
@@ -97,6 +97,6 @@ export default function CollapsibleHeaderContainer({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
-    marginTop: Platform.OS === 'android' ? -1 : 0
+    marginTop: Platform.OS === 'android' ? -1 : 0,
   },
 });

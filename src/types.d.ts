@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import type React from 'react';
 import type { View } from 'react-native';
 import type Animated from 'react-native-reanimated';
@@ -42,7 +43,7 @@ export type CollapsibleProps = {
 };
 
 export type PullToRefreshContextType = {
-  translateY: Animated.SharedValue<number>;
-  scrollRef: React.RefObject<any>;
-  panRef: React.RefObject<any>;
+  refreshValue: Animated.SharedValue<number>;
+  internalRefreshing: Animated.SharedValue<boolean>;
+  internalHeight: Animated.SharedValue<number>;
 };

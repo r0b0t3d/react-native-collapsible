@@ -6,8 +6,8 @@ import {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
-import useCollapsibleContext from './useCollapsibleContext';
-import { useInternalCollapsibleContext } from './useInternalCollapsibleContext';
+import useCollapsibleContext from '../../hooks/useCollapsibleContext';
+import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 
 const { height: wHeight } = Dimensions.get('window');
 

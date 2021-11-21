@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import useCollapsibleContext from '../../hooks/useCollapsibleContext';
+import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 import Animated, {
   Extrapolate,
   interpolate,

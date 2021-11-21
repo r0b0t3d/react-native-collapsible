@@ -5,18 +5,17 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { FlatListProps, View, StyleSheet } from 'react-native';
+import { FlatListProps, View, StyleSheet, FlatList } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
 } from 'react-native-reanimated';
-import AnimatedTopView from './AnimatedTopView';
-import useAnimatedScroll from '../hooks/useAnimatedScroll';
-import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import type { CollapsibleProps } from '../types';
-import { useInternalCollapsibleContext } from '../hooks/useInternalCollapsibleContext';
-import usePullToRefreshContext from '../hooks/usePullToRefreshContext';
-import { FlatList } from 'react-native-gesture-handler';
+import AnimatedTopView from '../header/AnimatedTopView';
+import useAnimatedScroll from './useAnimatedScroll';
+import useCollapsibleContext from '../../hooks/useCollapsibleContext';
+import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
+import type { CollapsibleProps } from '../../types';
+import PullToRefreshContainer from '../pullToRefresh/PullToRefreshContainer';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -27,9 +26,9 @@ export default function CollapsibleFlatList<Data>({
   headerSnappable = true,
   ...props
 }: Props<Data>) {
-  const { headerHeight } = useCollapsibleContext();
+  const { headerHeight, scrollY } = useCollapsibleContext();
   const { contentMinHeight } = useInternalCollapsibleContext();
-  const { scrollRef, panRef } = usePullToRefreshContext();
+  const scrollRef = useRef<any>(null);
   const mounted = useRef(true);
   const contentHeight = useRef(0);
 
@@ -101,20 +100,22 @@ export default function CollapsibleFlatList<Data>({
   );
 
   return (
-    // @ts-ignore
-    <AnimatedFlatList
-      ref={scrollRef}
-      bounces={false}
-      keyboardDismissMode="on-drag"
-      keyboardShouldPersistTaps="handled"
-      scrollEventThrottle={16}
-      {...props}
-      style={[styles.container, props.style]}
-      contentContainerStyle={contentContainerStyle}
-      onScroll={scrollHandler}
-      ListHeaderComponent={renderListHeader()}
-      onContentSizeChange={handleContentSizeChange}
-    />
+    <PullToRefreshContainer scrollY={scrollY}>
+      {/* @ts-ignore */}
+      <AnimatedFlatList
+        ref={scrollRef}
+        bounces={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={1}
+        {...props}
+        style={[styles.container, props.style]}
+        contentContainerStyle={contentContainerStyle}
+        onScroll={scrollHandler}
+        ListHeaderComponent={renderListHeader()}
+        onContentSizeChange={handleContentSizeChange}
+      />
+    </PullToRefreshContainer>
   );
 }
 
