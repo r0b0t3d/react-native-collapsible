@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
   CollapsibleContainer,
   CollapsibleHeaderContainer,
@@ -15,6 +22,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 function CollapsibleList() {
   const [currentTab, setCurrentTab] = useState(0);
   const { top } = useSafeAreaInsets();
+  const textInput = useRef(null);
 
   function renderHeder(props: any) {
     return <CollapsibleHeaderText title="Collapsible view" {...props} />;
@@ -22,7 +30,10 @@ function CollapsibleList() {
 
   return (
     <View style={styles.container}>
-      <CollapsibleContainer style={styles.contentContainer}>
+      <CollapsibleContainer
+        style={styles.contentContainer}
+        textInputRefs={[textInput]}
+      >
         <CollapsibleHeaderContainer>
           <View pointerEvents="box-none" style={styles.infoContainer}>
             <View style={styles.backgroundTop} />
@@ -37,7 +48,12 @@ function CollapsibleList() {
             <Text style={styles.name}>Alan Walker</Text>
           </View>
           <CollapsibleView renderHeader={renderHeder}>
-            <View style={styles.collapsibleView} />
+            <View style={styles.collapsibleView} pointerEvents="box-none">
+              <TextInput
+                ref={textInput}
+                placeholder="Avoiding keyboard textinput"
+              />
+            </View>
           </CollapsibleView>
           <StickyView style={{ paddingTop: top }}>
             <View style={styles.tabsContainer}>
@@ -150,7 +166,8 @@ const styles = StyleSheet.create({
     color: '#7339B3',
   },
   collapsibleView: {
-    height: 100,
+    height: 500,
     backgroundColor: 'yellow',
+    justifyContent: 'flex-end',
   },
 });

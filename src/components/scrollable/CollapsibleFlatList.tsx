@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   useCallback,
   useEffect,
@@ -27,8 +28,7 @@ export default function CollapsibleFlatList<Data>({
   ...props
 }: Props<Data>) {
   const { headerHeight, scrollY } = useCollapsibleContext();
-  const { contentMinHeight } = useInternalCollapsibleContext();
-  const scrollRef = useRef<any>(null);
+  const { contentMinHeight, scrollViewRef } = useInternalCollapsibleContext();
   const mounted = useRef(true);
   const contentHeight = useRef(0);
 
@@ -38,15 +38,12 @@ export default function CollapsibleFlatList<Data>({
     };
   }, []);
 
-  const scrollTo = useCallback(
-    (yValue: number, animated = true) => {
-      scrollRef.current?.scrollToOffset({
-        offset: yValue,
-        animated,
-      });
-    },
-    [scrollRef]
-  );
+  const scrollTo = useCallback((yValue: number, animated = true) => {
+    scrollViewRef.current?.scrollToOffset({
+      offset: yValue,
+      animated,
+    });
+  }, []);
 
   const handleInternalContentHeight = useCallback((value: number) => {
     if (mounted.current) {
@@ -103,7 +100,7 @@ export default function CollapsibleFlatList<Data>({
     <PullToRefreshContainer scrollY={scrollY}>
       {/* @ts-ignore */}
       <AnimatedFlatList
-        ref={scrollRef}
+        ref={scrollViewRef}
         bounces={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"

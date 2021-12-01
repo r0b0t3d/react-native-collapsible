@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import AnimatedTopView from '../header/AnimatedTopView';
 import useAnimatedScroll from './useAnimatedScroll';
-import React, { ReactNode, useCallback, useMemo, useRef } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { ScrollViewProps, StyleSheet } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import type { CollapsibleProps } from '../../types';
@@ -17,13 +18,11 @@ export default function CollapsibleScrollView({
   children,
   ...props
 }: Props) {
-  const scrollView = useRef<Animated.ScrollView>(null);
-  const { contentMinHeight } = useInternalCollapsibleContext();
+  const { contentMinHeight, scrollViewRef } = useInternalCollapsibleContext();
   const { headerHeight } = useCollapsibleContext();
 
   const scrollTo = useCallback((yValue: number, animated = true) => {
-    // @ts-ignore
-    scrollView.current?.scrollTo({ y: yValue, animated });
+    scrollViewRef.current?.scrollTo({ y: yValue, animated });
   }, []);
 
   const { scrollHandler } = useAnimatedScroll({
@@ -44,7 +43,7 @@ export default function CollapsibleScrollView({
 
   return (
     <Animated.ScrollView
-      ref={scrollView}
+      ref={scrollViewRef}
       bounces={false}
       {...props}
       style={[styles.container, props.style]}

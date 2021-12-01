@@ -31,6 +31,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const firstStickyViewY = useSharedValue(1000000);
     const headerContainersHeight = useRef<Record<string, number>>({});
     const containerRef = useRef<View>(null);
+    const scrollViewRef = useRef<View>(null);
 
     const setCollapsibleHandlers = useCallback((handlers) => {
       collapsibleHandlers.current = handlers;
@@ -164,6 +165,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
 
     const internalContext = useMemo(
       () => ({
+        scrollViewRef,
         containerRef,
         handleStickyViewLayout,
         handleHeaderContainerLayout,

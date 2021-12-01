@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import type React from 'react';
 import type { View } from 'react-native';
 import type Animated from 'react-native-reanimated';
@@ -23,6 +22,7 @@ export type LayoutParams = {
 };
 
 export type CollapsibleContextInternalType = {
+  scrollViewRef: React.RefObject<any>;
   containerRef: React.RefObject<View>;
   contentMinHeight: Animated.SharedValue<number>;
   firstStickyViewY: Animated.SharedValue<number>;
