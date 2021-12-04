@@ -34,6 +34,19 @@ export default function RefreshControl({
     internalRefreshing.value = refreshing;
   }, [refreshing]);
 
+  useAnimatedReaction(
+    () => {
+      return internalRefreshing.value;
+    },
+    (result, prev) => {
+      if (result !== prev) {
+        if (result && refreshValue.value === 0) {
+          refreshValue.value = height;
+        }
+      }
+    }
+  );
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       height: refreshValue.value,
@@ -41,7 +54,6 @@ export default function RefreshControl({
   }, []);
 
   const handleRefresh = useCallback(() => {
-    console.log('refresh');
     onRefresh();
   }, [onRefresh]);
 

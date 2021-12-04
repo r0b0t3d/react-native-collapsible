@@ -15,7 +15,7 @@ const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 export default function Top100Tab() {
   const { collapse } = useCollapsibleContext();
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
-  const [isLoading, setLoading] = React.useState(false);
+  const [isLoading, setLoading] = React.useState(true);
   const loadingRef = useRef<LottieView>(null);
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function Top100Tab() {
 
   const handleRefresh = useCallback(() => {
     setLoading(true);
-    setTimeout(() => setLoading(false), 2000);
+    setTimeout(() => setLoading(false), 5000);
   }, []);
 
   function renderLoading(animatedProps: AnimatedLottieViewProps) {

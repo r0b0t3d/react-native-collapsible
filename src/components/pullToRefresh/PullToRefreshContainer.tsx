@@ -24,7 +24,9 @@ export default function PullToRefreshContainer({ children, scrollY }: Props) {
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: any) => {
-      ctx.startY = internalRefreshing.value ? refreshValue.value : 0;
+      console.log('onStart', refreshValue.value);
+      ctx.startY =
+        (internalRefreshing.value ? refreshValue.value : 0) - scrollY.value;
     },
     onActive: (event, ctx: any) => {
       if (scrollY.value <= 1) {
@@ -34,7 +36,7 @@ export default function PullToRefreshContainer({ children, scrollY }: Props) {
         if (clampedValue > internalHeight.value) {
           internalRefreshing.value = true;
         }
-      } else {
+      } else if (!internalRefreshing.value) {
         refreshValue.value = 0;
       }
     },

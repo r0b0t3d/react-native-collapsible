@@ -40,10 +40,8 @@ export default function CollapsibleContainer({
         ref.current.measureLayout(
           // @ts-ignore
           containerRef.current,
-          (left: number, top: number, width: number, height: number) => {
-            console.log({ left, top, width, height });
+          (_left: number, top: number, _width: number, height: number) => {
             if (top + height - scrollY.value > containerHeight.current) {
-              console.log('need to scroll');
               const extraOffset =
                 keyboardAvoidingViewProps?.keyboardVerticalOffset ?? 20;
               scrollTo(top + height + extraOffset - containerHeight.current);
