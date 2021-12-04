@@ -24,7 +24,6 @@ export default function PullToRefreshContainer({ children, scrollY }: Props) {
 
   const gestureHandler = useAnimatedGestureHandler({
     onStart: (_, ctx: any) => {
-      console.log('onStart', refreshValue.value);
       ctx.startY =
         (internalRefreshing.value ? refreshValue.value : 0) - scrollY.value;
     },
