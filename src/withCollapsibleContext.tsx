@@ -1,9 +1,9 @@
 /* eslint-disable no-shadow */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { FC, useCallback, useMemo, useRef } from 'react';
-import type { CollapsibleHandles, LayoutParams } from '../types';
-import { CollapsibleContext } from './useCollapsibleContext';
-import { InternalCollapsibleContext } from './useInternalCollapsibleContext';
+import type { CollapsibleHandles, LayoutParams } from './types';
+import { CollapsibleContext } from './hooks/useCollapsibleContext';
+import { InternalCollapsibleContext } from './hooks/useInternalCollapsibleContext';
 import {
   useAnimatedReaction,
   useDerivedValue,
@@ -11,7 +11,8 @@ import {
   withTiming,
 } from 'react-native-reanimated';
 import type { View } from 'react-native';
-import { debounce } from '../utils/debounce';
+import { debounce } from './utils/debounce';
+import PullToRefreshProvider from './components/pullToRefresh/PullToRefreshProvider';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
@@ -30,6 +31,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const firstStickyViewY = useSharedValue(1000000);
     const headerContainersHeight = useRef<Record<string, number>>({});
     const containerRef = useRef<View>(null);
+    const scrollViewRef = useRef<View>(null);
 
     const setCollapsibleHandlers = useCallback((handlers) => {
       collapsibleHandlers.current = handlers;
@@ -163,6 +165,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
 
     const internalContext = useMemo(
       () => ({
+        scrollViewRef,
         containerRef,
         handleStickyViewLayout,
         handleHeaderContainerLayout,
@@ -190,7 +193,9 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     return (
       <CollapsibleContext.Provider value={context}>
         <InternalCollapsibleContext.Provider value={internalContext}>
-          <Component {...props} />
+          <PullToRefreshProvider>
+            <Component {...props} />
+          </PullToRefreshProvider>
         </InternalCollapsibleContext.Provider>
       </CollapsibleContext.Provider>
     );

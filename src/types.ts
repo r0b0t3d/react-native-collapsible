@@ -22,6 +22,7 @@ export type LayoutParams = {
 };
 
 export type CollapsibleContextInternalType = {
+  scrollViewRef: React.RefObject<any>;
   containerRef: React.RefObject<View>;
   contentMinHeight: Animated.SharedValue<number>;
   firstStickyViewY: Animated.SharedValue<number>;
@@ -39,4 +40,10 @@ export type CollapsibleContextInternalType = {
 
 export type CollapsibleProps = {
   headerSnappable?: boolean;
+};
+
+export type PullToRefreshContextType = {
+  refreshValue: Animated.SharedValue<number>;
+  internalRefreshing: Animated.SharedValue<boolean>;
+  internalHeight: Animated.SharedValue<number>;
 };
