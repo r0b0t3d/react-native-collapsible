@@ -138,7 +138,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
           0
         );
         headerHeight.value = withTiming(totalHeight, {
-          duration: fixedHeaderHeight.value === 0 ? 0 : 200,
+          duration: fixedHeaderHeight.value === 0 ? 0 : 10,
         });
         fixedHeaderHeight.value = totalHeight;
         // Try refresh sticky positions
