@@ -2,10 +2,18 @@ import type React from 'react';
 import type { View } from 'react-native';
 import type Animated from 'react-native-reanimated';
 
+export type ScrollToIndexParams = {
+  animated?: boolean | null;
+  index: number;
+  viewOffset?: number;
+  viewPosition?: number;
+};
+
 export type CollapsibleHandles = {
   collapse: () => void;
   expand: () => void;
   scrollTo: (offset: number, animate?: boolean) => void;
+  scrollToIndex: (params: ScrollToIndexParams) => void;
 };
 
 export type CollapsibleContextType = CollapsibleHandles & {

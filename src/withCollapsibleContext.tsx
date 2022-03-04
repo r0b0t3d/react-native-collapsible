@@ -34,6 +34,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const scrollViewRef = useRef<View>(null);
 
     const setCollapsibleHandlers = useCallback((handlers) => {
+      console.log({ handlers });
+
       collapsibleHandlers.current = handlers;
     }, []);
 
@@ -157,6 +159,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         expand: () => collapsibleHandlers.current?.expand(),
         scrollTo: (offset: number, animate?: boolean) =>
           collapsibleHandlers.current?.scrollTo(offset, animate),
+        scrollToIndex: (params: any) =>
+          collapsibleHandlers.current?.scrollToIndex(params),
         headerHeight,
         scrollY,
         headerCollapsed,

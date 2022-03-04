@@ -6,6 +6,7 @@ import {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
+import type { ScrollToIndexParams } from 'src/types';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 
@@ -14,11 +15,13 @@ const { height: wHeight } = Dimensions.get('window');
 type Props = {
   headerSnappable: boolean;
   scrollTo: (yValue: number, animated?: boolean) => void;
+  scrollToIndex: (params: ScrollToIndexParams) => void;
 };
 
 export default function useAnimatedScroll({
   headerSnappable,
   scrollTo,
+  scrollToIndex,
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
   const { scrollY } = useCollapsibleContext();
@@ -44,8 +47,9 @@ export default function useAnimatedScroll({
       collapse,
       expand,
       scrollTo,
+      scrollToIndex,
     });
-  }, [setCollapsibleHandlers, collapse, expand, scrollTo]);
+  }, [setCollapsibleHandlers, collapse, expand, scrollTo, scrollToIndex]);
 
   const scrollHandler = useAnimatedScrollHandler(
     {

@@ -25,9 +25,14 @@ export default function CollapsibleScrollView({
     scrollViewRef.current?.scrollTo({ y: yValue, animated });
   }, []);
 
+  const scrollToIndex = useCallback(() => {
+    console.warn("CollapsibleScrollView doesn't support scrollToIndex");
+  }, []);
+
   const { scrollHandler } = useAnimatedScroll({
     headerSnappable,
     scrollTo,
+    scrollToIndex,
   });
 
   const animatedStyle = useAnimatedStyle(() => {

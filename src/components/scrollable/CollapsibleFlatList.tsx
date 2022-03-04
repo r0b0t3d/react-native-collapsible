@@ -45,6 +45,10 @@ export default function CollapsibleFlatList<Data>({
     });
   }, []);
 
+  const scrollToIndex = useCallback((params) => {
+    scrollViewRef.current?.scrollToIndex(params);
+  }, []);
+
   const handleInternalContentHeight = useCallback((value: number) => {
     if (mounted.current) {
       setInternalContentMinHeight(value);
@@ -54,6 +58,7 @@ export default function CollapsibleFlatList<Data>({
   const { scrollHandler } = useAnimatedScroll({
     headerSnappable,
     scrollTo,
+    scrollToIndex,
   });
 
   const [internalContentMinHeight, setInternalContentMinHeight] = useState(
@@ -89,6 +94,8 @@ export default function CollapsibleFlatList<Data>({
     contentHeight.current = height;
   }, []);
 
+  const handleScrollToIndexFailed = useCallback(() => {}, []);
+
   const renderListHeader = () => (
     <View>
       <AnimatedTopView height={headerHeight} />
@@ -105,6 +112,7 @@ export default function CollapsibleFlatList<Data>({
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
         scrollEventThrottle={1}
+        onScrollToIndexFailed={handleScrollToIndexFailed}
         {...props}
         style={[styles.container, props.style]}
         contentContainerStyle={contentContainerStyle}
