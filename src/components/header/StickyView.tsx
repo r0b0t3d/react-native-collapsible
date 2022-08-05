@@ -30,7 +30,7 @@ export default function StickyView({ children, style }: Props) {
 
   const handleLayout = useCallback(() => {
     handleStickyViewLayout(key, viewRef);
-  }, [handleStickyViewLayout, key]);
+  }, [key]);
 
   const translateY = useDerivedValue(() => {
     const top = stickyViewTops.value[key] || 0;

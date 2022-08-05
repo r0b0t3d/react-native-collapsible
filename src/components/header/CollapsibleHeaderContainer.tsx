@@ -46,7 +46,7 @@ export default function CollapsibleHeaderContainer({
       headerHeight.value = height;
       handleHeaderContainerLayout(contentKey, height);
     },
-    [contentKey, handleHeaderContainerLayout]
+    [contentKey]
   );
 
   const headerTranslate = useDerivedValue(

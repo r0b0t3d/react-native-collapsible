@@ -155,7 +155,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
 
     const context = useMemo(() => {
       return {
-        collapse: () => collapsibleHandlers.current?.collapse(),
+        collapse: (animated?: boolean) =>
+          collapsibleHandlers.current?.collapse(animated),
         expand: () => collapsibleHandlers.current?.expand(),
         scrollTo: (offset: number, animate?: boolean) =>
           collapsibleHandlers.current?.scrollTo(offset, animate),

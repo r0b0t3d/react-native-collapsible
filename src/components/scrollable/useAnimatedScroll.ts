@@ -34,11 +34,15 @@ export default function useAnimatedScroll({
     }
   }, []);
 
-  const collapse = useCallback(() => {
-    scrollTo(
-      Math.min(fixedHeaderHeight.value || 0, firstStickyViewY.value || 0)
-    );
-  }, [scrollTo]);
+  const collapse = useCallback(
+    (animated = true) => {
+      scrollTo(
+        Math.min(fixedHeaderHeight.value || 0, firstStickyViewY.value || 0),
+        animated
+      );
+    },
+    [scrollTo]
+  );
 
   const expand = useCallback(() => scrollTo(0), [scrollTo]);
 

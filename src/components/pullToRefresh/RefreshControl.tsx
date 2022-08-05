@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
   runOnJS,
@@ -25,12 +25,16 @@ export default function RefreshControl({
 }: Props) {
   const { refreshValue, internalRefreshing, internalHeight } =
     usePullToRefreshContext();
+  const manualTriggered = useRef(false);
 
   useEffect(() => {
     internalHeight.value = height;
   }, [height]);
 
   useEffect(() => {
+    if (!internalRefreshing.value && refreshing) {
+      manualTriggered.current = true;
+    }
     internalRefreshing.value = refreshing;
   }, [refreshing]);
 
@@ -54,6 +58,10 @@ export default function RefreshControl({
   }, []);
 
   const handleRefresh = useCallback(() => {
+    if (manualTriggered.current) {
+      manualTriggered.current = false;
+      return;
+    }
     onRefresh();
   }, [onRefresh]);
 

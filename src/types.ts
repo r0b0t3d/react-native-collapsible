@@ -10,7 +10,7 @@ export type ScrollToIndexParams = {
 };
 
 export type CollapsibleHandles = {
-  collapse: () => void;
+  collapse: (animated?: boolean) => void;
   expand: () => void;
   scrollTo: (offset: number, animate?: boolean) => void;
   scrollToIndex: (params: ScrollToIndexParams) => void;

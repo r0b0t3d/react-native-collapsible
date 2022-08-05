@@ -78,7 +78,7 @@ export default function Top100Tab() {
             <TextInput
               placeholder="Looking for..."
               style={styles.search}
-              onFocus={collapse}
+              onFocus={() => collapse()}
             />
           </View>
         </StickyView>

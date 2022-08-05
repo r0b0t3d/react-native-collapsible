@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useRef } from 'react';
 import {
   KeyboardAvoidingView,
@@ -54,14 +55,11 @@ export default function CollapsibleContainer({
     });
   });
 
-  const handleContainerLayout = useCallback(
-    (layout: LayoutChangeEvent) => {
-      const height = layout.nativeEvent.layout.height;
-      containerHeight.current = height;
-      handleContainerHeight(height);
-    },
-    [handleContainerHeight]
-  );
+  const handleContainerLayout = useCallback((layout: LayoutChangeEvent) => {
+    const height = layout.nativeEvent.layout.height;
+    containerHeight.current = height;
+    handleContainerHeight(height);
+  }, []);
 
   return (
     <KeyboardAvoidingView
