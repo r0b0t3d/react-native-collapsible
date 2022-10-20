@@ -73,10 +73,4 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexGrow: 1,
   },
-  topView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
 });
