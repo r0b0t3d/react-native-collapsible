@@ -1,21 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
-import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
-import {
-  LayoutChangeEvent,
-  Platform,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-} from 'react-native-reanimated';
-import useCollapsibleContext from '../../hooks/useCollapsibleContext';
+import { ReactNode, useEffect, useMemo } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
+import useCollapsibleHeaderContext from '../../hooks/useCollapsibleHeaderContext';
 
 type Props = {
   children: ReactNode;
@@ -24,76 +10,21 @@ type Props = {
 
 let key = 0;
 
-export default function CollapsibleHeaderContainer({
-  children,
-  containerStyle,
-}: Props) {
+export default function CollapsibleHeaderContainer({ children }: Props) {
   const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
-  const { scrollY } = useCollapsibleContext();
-  const { handleHeaderContainerLayout } = useInternalCollapsibleContext();
-  const headerHeight = useSharedValue(0);
+  const { mount, unmount, update } = useCollapsibleHeaderContext();
 
   useEffect(() => {
-    return () => handleHeaderContainerLayout(contentKey, undefined);
-  }, []);
+    mount(contentKey, children);
 
-  const handleHeaderLayout = useCallback(
-    ({
-      nativeEvent: {
-        layout: { height },
-      },
-    }: LayoutChangeEvent) => {
-      headerHeight.value = height;
-      handleHeaderContainerLayout(contentKey, height);
-    },
-    [contentKey]
-  );
-
-  const headerTranslate = useDerivedValue(
-    () =>
-      interpolate(
-        scrollY.value,
-        // FIXME: can improve by geting maxY value of header and sticky views
-        [-250, 0, 100000],
-        [250, 0, -100000],
-        Animated.Extrapolate.CLAMP
-      ),
-    []
-  );
-
-  const headerStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: headerTranslate.value }],
-      minHeight: headerHeight.value,
+    return () => {
+      unmount(contentKey);
     };
-  }, [headerHeight, headerTranslate]);
+  }, [contentKey]);
 
-  const internalStyle = useMemo(() => {
-    return {
-      zIndex: 100000 - key,
-    };
-  }, []);
+  useEffect(() => {
+    update(contentKey, children);
+  }, [children]);
 
-  return (
-    <Animated.View
-      style={[headerStyle, internalStyle]}
-      pointerEvents="box-none"
-    >
-      <View
-        key={contentKey}
-        onLayout={handleHeaderLayout}
-        pointerEvents="box-none"
-        style={[styles.container, containerStyle]}
-      >
-        {children}
-      </View>
-    </Animated.View>
-  );
+  return null;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-    marginTop: Platform.OS === 'android' ? -1 : 0,
-  },
-});

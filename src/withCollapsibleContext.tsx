@@ -13,6 +13,7 @@ import {
 import type { View } from 'react-native';
 import { debounce } from './utils/debounce';
 import PullToRefreshProvider from './components/pullToRefresh/PullToRefreshProvider';
+import CollapsibleHeaderProvider from './components/header/CollapsibleHeaderProvider';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
@@ -29,13 +30,10 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const stickyHeaderHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
     const firstStickyViewY = useSharedValue(1000000);
-    const headerContainersHeight = useRef<Record<string, number>>({});
     const containerRef = useRef<View>(null);
     const scrollViewRef = useRef<View>(null);
 
     const setCollapsibleHandlers = useCallback((handlers) => {
-      console.log({ handlers });
-
       collapsibleHandlers.current = handlers;
     }, []);
 
@@ -128,26 +126,14 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       }, 200);
     }, []);
 
-    const handleHeaderContainerLayout = useCallback(
-      (viewKey: string, height?: number) => {
-        if (!height) {
-          delete headerContainersHeight.current[viewKey];
-        } else {
-          headerContainersHeight.current[viewKey] = height;
-        }
-        const totalHeight = Object.keys(headerContainersHeight.current).reduce(
-          (acc, key) => headerContainersHeight.current[key] + acc,
-          0
-        );
-        headerHeight.value = withTiming(totalHeight, {
-          duration: fixedHeaderHeight.value === 0 ? 0 : 10,
-        });
-        fixedHeaderHeight.value = totalHeight;
-        // Try refresh sticky positions
-        debounceRefreshStickyPositions();
-      },
-      []
-    );
+    const handleHeaderContainerLayout = useCallback((height: number) => {
+      headerHeight.value = withTiming(height, {
+        duration: fixedHeaderHeight.value === 0 ? 0 : 10,
+      });
+      fixedHeaderHeight.value = height;
+      // Try refresh sticky positions
+      debounceRefreshStickyPositions();
+    }, []);
 
     const handleContainerHeight = useCallback((height: number) => {
       containerHeight.value = height;
@@ -198,9 +184,12 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     return (
       <CollapsibleContext.Provider value={context}>
         <InternalCollapsibleContext.Provider value={internalContext}>
-          <PullToRefreshProvider>
-            <Component {...props} />
-          </PullToRefreshProvider>
+          <CollapsibleHeaderProvider>
+            <PullToRefreshProvider>
+              {/** @ts-ignore */}
+              <Component {...props} />
+            </PullToRefreshProvider>
+          </CollapsibleHeaderProvider>
         </InternalCollapsibleContext.Provider>
       </CollapsibleContext.Provider>
     );

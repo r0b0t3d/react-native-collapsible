@@ -42,7 +42,7 @@ export type CollapsibleContextInternalType = {
     viewKey: string,
     viewRef?: React.RefObject<View>
   ) => void;
-  handleHeaderContainerLayout: (viewKey: string, height?: number) => void;
+  handleHeaderContainerLayout: (height: number) => void;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;
 };
 
