@@ -22,7 +22,7 @@ export default function CollapsibleHeaderContainer({ children }: Props) {
 
   const content = useMemo(() => {
     return (
-      <View key={contentKey} style={internalStyle}>
+      <View key={contentKey} style={internalStyle} pointerEvents="box-none">
         {children}
       </View>
     );
