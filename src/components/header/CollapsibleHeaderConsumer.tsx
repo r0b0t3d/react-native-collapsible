@@ -57,5 +57,6 @@ export default function CollapsibleHeaderConsumer() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
+    zIndex: 10,
   },
 });
