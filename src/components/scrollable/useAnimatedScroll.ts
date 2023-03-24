@@ -6,7 +6,7 @@ import {
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
-import type { ScrollToIndexParams } from 'src/types';
+import type { ScrollToIndexParams } from '../../types';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 

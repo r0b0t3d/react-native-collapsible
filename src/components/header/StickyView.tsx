@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 import Animated, {
@@ -72,5 +72,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     zIndex: 10,
+    marginTop: Platform.OS === 'android' ? -1 : 0,
   },
 });

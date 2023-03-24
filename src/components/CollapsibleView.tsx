@@ -17,6 +17,8 @@ import Animated, {
   withSpring,
   interpolateColor,
   interpolate,
+  useAnimatedReaction,
+  runOnJS,
 } from 'react-native-reanimated';
 
 export type CollapsibleHeaderProps = {
@@ -33,6 +35,7 @@ type Props = {
   collapsedBackgroundColor?: string;
   expandedBackgroundColor?: string;
   useDynamicLayout?: boolean;
+  onToggle?: (isExpand: boolean) => void;
 };
 
 let key = 0;
@@ -44,6 +47,7 @@ export default function CollapsibleView({
   containerStyle,
   collapsedBackgroundColor,
   expandedBackgroundColor,
+  onToggle,
 }: Props) {
   const actualHeight = useSharedValue(11110);
   const contentKey = useMemo(() => `collapsible-view-${key++}`, []);
@@ -56,7 +60,7 @@ export default function CollapsibleView({
     collapseState.value = newValue;
   }, [initialState]);
 
-  const onToggle = useCallback(() => {
+  const handleToggle = useCallback(() => {
     collapseState.value = withSpring(collapseState.value === 0 ? 1 : 0, {
       overshootClamping: true,
     });
@@ -86,6 +90,18 @@ export default function CollapsibleView({
     [actualHeight, contentKey]
   );
 
+  useAnimatedReaction(
+    () => (collapseState.value === 0 ? 0 : collapseState.value === 1 ? 1 : 0),
+    (result, prev) => {
+      if (result === prev) {
+        return;
+      }
+      if (onToggle) {
+        runOnJS(onToggle)(result === 1);
+      }
+    }
+  );
+
   // @ts-ignore
   const containerAnimatedStyle = useAnimatedStyle(() => {
     if (collapsedBackgroundColor && expandedBackgroundColor) {
@@ -101,8 +117,8 @@ export default function CollapsibleView({
   }, []);
 
   const headerProps = useMemo(
-    () => ({ onToggle, collapsed: collapseState }),
-    [onToggle, collapseState]
+    () => ({ onToggle: handleToggle, collapsed: collapseState }),
+    [handleToggle, collapseState]
   );
 
   return (

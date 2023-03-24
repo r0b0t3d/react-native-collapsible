@@ -10,7 +10,10 @@ type Props = {
 
 let key = 0;
 
-export default function CollapsibleHeaderContainer({ children }: Props) {
+export default function CollapsibleHeaderContainer({
+  children,
+  containerStyle,
+}: Props) {
   const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
   const { mount, unmount, update } = useCollapsibleHeaderContext();
 
@@ -22,11 +25,15 @@ export default function CollapsibleHeaderContainer({ children }: Props) {
 
   const content = useMemo(() => {
     return (
-      <View key={contentKey} style={internalStyle} pointerEvents="box-none">
+      <View
+        key={contentKey}
+        style={[containerStyle, internalStyle]}
+        pointerEvents="box-none"
+      >
         {children}
       </View>
     );
-  }, [children]);
+  }, [children, containerStyle]);
 
   useEffect(() => {
     mount(contentKey, content);

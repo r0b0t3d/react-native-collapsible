@@ -119,6 +119,8 @@ export default function CollapsibleFlatList<Data>({
         onScroll={scrollHandler}
         ListHeaderComponent={renderListHeader()}
         onContentSizeChange={handleContentSizeChange}
+        //@ts-ignore
+        simultaneousHandlers={[]}
       />
     </PullToRefreshContainer>
   );
