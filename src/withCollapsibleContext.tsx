@@ -12,7 +12,6 @@ import {
 } from 'react-native-reanimated';
 import type { View } from 'react-native';
 import { debounce } from './utils/debounce';
-import PullToRefreshProvider from './components/pullToRefresh/PullToRefreshProvider';
 import CollapsibleHeaderProvider from './components/header/CollapsibleHeaderProvider';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
@@ -185,10 +184,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       <CollapsibleContext.Provider value={context}>
         <InternalCollapsibleContext.Provider value={internalContext}>
           <CollapsibleHeaderProvider>
-            <PullToRefreshProvider>
-              {/** @ts-ignore */}
-              <Component {...props} />
-            </PullToRefreshProvider>
+            {/** @ts-ignore */}
+            <Component {...props} />
           </CollapsibleHeaderProvider>
         </InternalCollapsibleContext.Provider>
       </CollapsibleContext.Provider>

@@ -1,4 +1,4 @@
-import { CollapsibleFlatList } from '@r0b0t3d/react-native-collapsible';
+import { CollapsibleScrollView } from '@r0b0t3d/react-native-collapsible';
 import React, { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
@@ -7,9 +7,9 @@ type Props = {};
 export default function AlbumsTab({}: Props) {
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
 
-  function renderItem() {
+  function renderItem(item: any) {
     return (
-      <View style={styles.itemContainer}>
+      <View style={styles.itemContainer} key={item.id}>
         <Image
           source={{
             uri: 'https://c-cl.cdn.smule.com/rs-s47/arr/9c/41/bde657bd-960c-4da9-94d0-f261115b675a.jpg',
@@ -24,9 +24,7 @@ export default function AlbumsTab({}: Props) {
     );
   }
 
-  return (
-    <CollapsibleFlatList data={data} numColumns={2} renderItem={renderItem} />
-  );
+  return <CollapsibleScrollView>{data.map(renderItem)}</CollapsibleScrollView>;
 }
 
 const styles = StyleSheet.create({

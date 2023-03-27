@@ -1,59 +1,21 @@
 import {
   CollapsibleFlatList,
   CollapsibleHeaderContainer,
-  RefreshControl,
   StickyView,
   useCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
-import Animated from 'react-native-reanimated';
-import LottieView, { AnimatedLottieViewProps } from 'lottie-react-native';
-
-const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
 export default function Top100Tab() {
   const { collapse } = useCollapsibleContext();
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
   const [isLoading, setLoading] = React.useState(true);
-  const loadingRef = useRef<LottieView>(null);
-
-  useEffect(() => {
-    if (loadingRef.current) {
-      if (isLoading) {
-        loadingRef.current.play();
-      } else {
-        loadingRef.current.reset();
-      }
-    }
-  }, [isLoading]);
 
   const handleRefresh = useCallback(() => {
     setLoading(true);
     setTimeout(() => setLoading(false), 5000);
   }, []);
-
-  function renderLoading(animatedProps: AnimatedLottieViewProps) {
-    return (
-      <AnimatedLottieView
-        ref={loadingRef}
-        source={require('../../../assets/animations/loading-rocket.json')}
-        style={{ height: 100, width: '100%', backgroundColor: 'red' }}
-        animatedProps={animatedProps}
-        loop
-      />
-    );
-  }
-
-  function renderHeader() {
-    return (
-      <RefreshControl
-        refreshing={isLoading}
-        onRefresh={handleRefresh}
-        renderAnimation={renderLoading}
-      />
-    );
-  }
 
   const renderItem = ({ index }: any) => {
     return (
@@ -86,8 +48,8 @@ export default function Top100Tab() {
       <CollapsibleFlatList
         data={data}
         renderItem={renderItem}
-        contentContainerStyle={{ marginTop: 10 }}
-        ListHeaderComponent={renderHeader()}
+        refreshing={isLoading}
+        onRefresh={handleRefresh}
       />
     </>
   );
