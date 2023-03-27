@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { ReactNode, useEffect, useMemo } from 'react';
-import { View, StyleProp, ViewStyle } from 'react-native';
+import type { StyleProp, ViewStyle } from 'react-native';
+import React, { Fragment, ReactNode, useEffect, useMemo } from 'react';
 import useCollapsibleHeaderContext from '../../hooks/useCollapsibleHeaderContext';
 
 type Props = {
@@ -17,22 +17,8 @@ export default function CollapsibleHeaderContainer({
   const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
   const { mount, unmount, update } = useCollapsibleHeaderContext();
 
-  const internalStyle = useMemo(() => {
-    return {
-      zIndex: 100000 - key,
-    };
-  }, []);
-
   const content = useMemo(() => {
-    return (
-      <View
-        key={contentKey}
-        style={[containerStyle, internalStyle]}
-        pointerEvents="box-none"
-      >
-        {children}
-      </View>
-    );
+    return <Fragment key={contentKey}>{children}</Fragment>;
   }, [children, containerStyle]);
 
   useEffect(() => {

@@ -19,8 +19,8 @@ export default function CollapsibleHeaderConsumer() {
       interpolate(
         scrollY.value,
         // FIXME: can improve by geting maxY value of header and sticky views
-        [-250, 0, 100000],
-        [250, 0, -100000],
+        [-1000, 0, 100000],
+        [-1000, 0, -100000],
         Animated.Extrapolate.CLAMP
       ),
     []

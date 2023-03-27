@@ -11,7 +11,6 @@ import {
 import useKeyboardShowEvent from '../hooks/useKeyboardShowEvent';
 import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import CollapsibleHeaderConsumer from './header/CollapsibleHeaderConsumer';
 
 type Props = Omit<ViewProps, 'ref' | 'onLayout'> & {
   children: Element;
@@ -76,7 +75,6 @@ export default function CollapsibleContainer({
         collapsable={false}
       >
         {children}
-        <CollapsibleHeaderConsumer />
       </View>
     </KeyboardAvoidingView>
   );
