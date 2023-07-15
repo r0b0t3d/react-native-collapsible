@@ -1,6 +1,5 @@
-/* eslint-disable no-shadow */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { FC, useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, FC } from 'react';
 import type { CollapsibleHandles, LayoutParams } from './types';
 import { CollapsibleContext } from './hooks/useCollapsibleContext';
 import { InternalCollapsibleContext } from './hooks/useInternalCollapsibleContext';
@@ -19,14 +18,17 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const collapsibleHandlers = useRef<CollapsibleHandles>();
     const headerHeight = useSharedValue(0);
     const scrollY = useSharedValue(0);
-    const stickyViewRefs = useRef<Record<string, React.RefObject<View>>>({});
+    const stickyViewRefs = useRef<
+      Record<string, React.RefObject<View> | undefined>
+    >({});
     const stickyViewTops = useSharedValue<Record<string, number>>({});
-    const stickyViewPositionsRef = useRef<Record<string, LayoutParams>>({});
+    const stickyViewPositionsRef = useRef<
+      Record<string, LayoutParams | undefined>
+    >({});
     const stickyViewPositions = useSharedValue<Record<string, LayoutParams>>(
       {}
     );
     const fixedHeaderHeight = useSharedValue(0);
-    const stickyHeaderHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
     const firstStickyViewY = useSharedValue(1000000);
     const containerRef = useRef<View>(null);
@@ -42,18 +44,18 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     }, []);
 
     const contentMinHeight = useDerivedValue(() => {
-      return (
-        containerHeight.value +
-        fixedHeaderHeight.value -
-        stickyHeaderHeight.value
-      );
+      return containerHeight.value + fixedHeaderHeight.value;
     }, []);
 
     useAnimatedReaction(
       () => {
         const totalHeight = Object.keys(stickyViewPositions.value).reduce(
           (acc, item) => {
-            return acc + stickyViewPositions.value[item].top;
+            const value = stickyViewPositions.value[item];
+            if (value) {
+              return acc + value.top;
+            }
+            return acc;
           },
           0
         );
@@ -62,29 +64,23 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       (result, previous) => {
         if (result !== previous) {
           const viewPositions = stickyViewPositions.value;
-          const headerHeight = fixedHeaderHeight.value;
-          const sortedKeys = Object.keys(viewPositions).sort(
-            (a, b) => viewPositions[a].top - viewPositions[b].top
-          );
+          const sortedKeys = Object.keys(viewPositions)
+            .filter((v) => !!viewPositions[v])
+            // @ts-ignore
+            .sort((a, b) => viewPositions[a].top - viewPositions[b].top);
           let totalTop = 0;
           const values: any = {};
           for (let i = 0; i < sortedKeys.length; i++) {
+            // @ts-ignore
             values[sortedKeys[i]] = totalTop;
             // Try minus 1 make it filled when scrolling up.
             // Otherwise, we can see a small space between the persits views
+            // @ts-ignore
             totalTop += viewPositions[sortedKeys[i]].height - 1;
           }
           stickyViewTops.value = values;
+          // @ts-ignore
           firstStickyViewY.value = viewPositions[sortedKeys[0]]?.top || 0;
-          const stickyHeader = sortedKeys.reduce((acc, key) => {
-            const data = viewPositions[key];
-            const isInsideHeader = data.top < headerHeight;
-            if (isInsideHeader) {
-              return acc + data.height;
-            }
-            return acc;
-          }, 0);
-          stickyHeaderHeight.value = stickyHeader;
         }
       }
     );
@@ -101,13 +97,21 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
                 ...stickyViewPositionsRef.current,
                 [viewKey]: { left, top, width, height },
               };
+              // @ts-ignore
               stickyViewPositions.value = stickyViewPositionsRef.current;
             },
             () => {}
           );
         } else {
-          delete stickyViewRefs.current[viewKey];
-          delete stickyViewPositionsRef.current[viewKey];
+          stickyViewRefs.current = {
+            ...stickyViewRefs.current,
+            [viewKey]: undefined,
+          };
+          stickyViewPositionsRef.current = {
+            ...stickyViewPositionsRef.current,
+            [viewKey]: undefined,
+          };
+          // @ts-ignore
           stickyViewPositions.value = stickyViewPositionsRef.current;
         }
       },

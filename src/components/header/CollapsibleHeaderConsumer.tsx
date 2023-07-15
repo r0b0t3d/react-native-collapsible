@@ -21,7 +21,7 @@ export default function CollapsibleHeaderConsumer() {
         // FIXME: can improve by geting maxY value of header and sticky views
         [-1000, 0, 100000],
         [0, 0, -100000],
-        Animated.Extrapolate.CLAMP
+        'clamp'
       ),
     []
   );

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Platform, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 import Animated, {
@@ -26,7 +26,7 @@ export default function StickyView({ children, style }: Props) {
 
   useEffect(() => {
     return () => handleStickyViewLayout(key, undefined);
-  }, []);
+  }, [key]);
 
   const handleLayout = useCallback(() => {
     handleStickyViewLayout(key, viewRef);
@@ -42,7 +42,7 @@ export default function StickyView({ children, style }: Props) {
       [0, 0, 100000],
       Extrapolate.CLAMP
     );
-  }, []);
+  }, [key]);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -72,6 +72,5 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     zIndex: 10,
-    marginTop: Platform.OS === 'android' ? -1 : 0,
   },
 });
