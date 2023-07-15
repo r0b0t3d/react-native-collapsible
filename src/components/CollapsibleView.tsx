@@ -3,11 +3,11 @@
 import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
+  Pressable,
   StyleProp,
   StyleSheet,
   Text,
   TextStyle,
-  TouchableOpacity,
   View,
   ViewStyle,
 } from 'react-native';
@@ -181,13 +181,19 @@ export function CollapsibleHeaderText({
   }, [iconInitialAngle]);
 
   return (
-    <TouchableOpacity activeOpacity={0.9} onPress={onToggle} style={style}>
-      <View style={styles.headerContainer}>
-        <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
-        {icon && <Animated.View style={iconStyle}>{icon}</Animated.View>}
+    <View style={style} pointerEvents="box-none">
+      <View style={styles.headerContainer} pointerEvents="box-none">
+        <Pressable onPress={onToggle}>
+          <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
+        </Pressable>
+        {icon && (
+          <Pressable onPress={onToggle}>
+            <Animated.View style={iconStyle}>{icon}</Animated.View>
+          </Pressable>
+        )}
       </View>
       {children}
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -199,6 +205,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     flex: 1,
