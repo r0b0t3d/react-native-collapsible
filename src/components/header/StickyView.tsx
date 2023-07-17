@@ -49,8 +49,6 @@ export default function StickyView({ children, style }: Props) {
     const { height: stickyHeight, y: top } = currentLayout.value;
     const topValue = top;
 
-    console.log({ key, animatedY: animatedY.value, top, stickyHeight });
-
     return interpolate(
       animatedY.value,
       [0, topValue, topValue + stickyHeight + 100],

@@ -86,8 +86,6 @@ export default function CollapsibleHeaderContainer({
 
   const handleStickyViewLayout = useCallback(
     (stickyKey: string, layout?: LayoutRectangle) => {
-      console.log('handleStickyViewLayout', stickyKey, layout);
-
       setStickyLayouts({
         [stickyKey]: layout,
       });
