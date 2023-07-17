@@ -25,7 +25,7 @@ export default function useAnimatedScroll({
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
   const { scrollY } = useCollapsibleContext();
-  const { setCollapsibleHandlers, firstStickyViewY, fixedHeaderHeight } =
+  const { setCollapsibleHandlers, fixedHeaderHeight } =
     useInternalCollapsibleContext();
 
   useEffect(() => {
@@ -36,10 +36,7 @@ export default function useAnimatedScroll({
 
   const collapse = useCallback(
     (animated = true) => {
-      scrollTo(
-        Math.min(fixedHeaderHeight.value || 0, firstStickyViewY.value || 0),
-        animated
-      );
+      scrollTo(fixedHeaderHeight.value, animated);
     },
     [scrollTo]
   );
@@ -65,10 +62,7 @@ export default function useAnimatedScroll({
       },
       onEndDrag: () => {
         if (!headerSnappable) return;
-        const maxY =
-          firstStickyViewY.value && firstStickyViewY.value > 0
-            ? firstStickyViewY.value
-            : fixedHeaderHeight.value || 0;
+        const maxY = fixedHeaderHeight.value;
 
         if (scrollY.value < maxY) {
           const delta = Math.abs(scrollY.value - maxY);

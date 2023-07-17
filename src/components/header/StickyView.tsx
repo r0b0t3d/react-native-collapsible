@@ -1,14 +1,21 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import useCollapsibleContext from '../../hooks/useCollapsibleContext';
-import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
+import {
+  LayoutChangeEvent,
+  LayoutRectangle,
+  StyleProp,
+  StyleSheet,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Animated, {
   Extrapolate,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
+  useSharedValue,
 } from 'react-native-reanimated';
+import useCollapsibleHeaderContext from '../../hooks/useCollapsibleHeaderContext';
 
 type Props = {
   style?: StyleProp<ViewStyle>;
@@ -20,29 +27,37 @@ let stickyKey = 0;
 export default function StickyView({ children, style }: Props) {
   const key = useMemo(() => `sticky_${stickyKey++}`, []);
   const viewRef = useRef<View>(null);
-  const { handleStickyViewLayout, stickyViewTops, stickyViewPositions } =
-    useInternalCollapsibleContext();
-  const { scrollY } = useCollapsibleContext();
+  const { handleStickyViewLayout, animatedY } = useCollapsibleHeaderContext();
+  const currentLayout = useSharedValue<LayoutRectangle | undefined>(undefined);
 
   useEffect(() => {
     return () => handleStickyViewLayout(key, undefined);
   }, [key]);
 
-  const handleLayout = useCallback(() => {
-    handleStickyViewLayout(key, viewRef);
-  }, [key]);
+  const handleLayout = useCallback(
+    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+      currentLayout.value = layout;
+      handleStickyViewLayout(key, layout);
+    },
+    [key, handleStickyViewLayout]
+  );
 
   const translateY = useDerivedValue(() => {
-    const top = stickyViewTops.value[key] || 0;
-    const layoutValues = stickyViewPositions.value[key] || { top: 0 };
-    const inputMid = layoutValues.top - top;
+    if (!currentLayout.value) {
+      return 0;
+    }
+    const { height: stickyHeight, y: top } = currentLayout.value;
+    const topValue = top;
+
+    console.log({ key, animatedY: animatedY.value, top, stickyHeight });
+
     return interpolate(
-      scrollY.value,
-      [0, inputMid, inputMid + 100000],
-      [0, 0, 100000],
+      animatedY.value,
+      [0, topValue, topValue + stickyHeight + 100],
+      [0, 0, stickyHeight + 100],
       Extrapolate.CLAMP
     );
-  }, [key]);
+  }, []);
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -60,7 +75,7 @@ export default function StickyView({ children, style }: Props) {
       // @ts-ignore
       ref={viewRef}
       onLayout={handleLayout}
-      style={[styles.container, animatedStyle, style]}
+      style={[styles.container, style, animatedStyle]}
       pointerEvents="box-none"
     >
       {children}

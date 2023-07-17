@@ -35,6 +35,19 @@ export default function Top100Tab() {
   return (
     <>
       <CollapsibleHeaderContainer>
+        <View style={styles.headerView} />
+        <StickyView>
+          <View style={styles.searchBox}>
+            <TextInput
+              placeholder="Looking for..."
+              style={styles.search}
+              onFocus={() => collapse()}
+            />
+          </View>
+        </StickyView>
+      </CollapsibleHeaderContainer>
+      <CollapsibleHeaderContainer>
+        <View style={styles.headerView} />
         <StickyView>
           <View style={styles.searchBox}>
             <TextInput
@@ -46,6 +59,7 @@ export default function Top100Tab() {
         </StickyView>
       </CollapsibleHeaderContainer>
       <CollapsibleFlatList
+        headerSnappable={false}
         data={data}
         renderItem={renderItem}
         refreshing={isLoading}
@@ -70,7 +84,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     paddingVertical: 15,
     paddingHorizontal: 15,
-    marginBottom: 10,
+    height: 80,
   },
   search: {
     fontSize: 14,
@@ -89,5 +103,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginRight: 15,
     width: 20,
+  },
+  headerView: {
+    height: 100,
+    backgroundColor: 'red',
   },
 });

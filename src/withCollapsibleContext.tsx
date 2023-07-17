@@ -1,45 +1,35 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useMemo, useRef, FC } from 'react';
-import type { CollapsibleHandles, LayoutParams } from './types';
+import type { CollapsibleHandles } from './types';
 import { CollapsibleContext } from './hooks/useCollapsibleContext';
 import { InternalCollapsibleContext } from './hooks/useInternalCollapsibleContext';
 import {
-  useAnimatedReaction,
   useDerivedValue,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import type { View } from 'react-native';
-import { debounce } from './utils/debounce';
-import CollapsibleHeaderProvider from './components/header/CollapsibleHeaderProvider';
+import type { LayoutRectangle, View } from 'react-native';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
     const collapsibleHandlers = useRef<CollapsibleHandles>();
     const headerHeight = useSharedValue(0);
     const scrollY = useSharedValue(0);
-    const stickyViewRefs = useRef<
-      Record<string, React.RefObject<View> | undefined>
-    >({});
-    const stickyViewTops = useSharedValue<Record<string, number>>({});
-    const stickyViewPositionsRef = useRef<
-      Record<string, LayoutParams | undefined>
-    >({});
-    const stickyViewPositions = useSharedValue<Record<string, LayoutParams>>(
-      {}
-    );
     const fixedHeaderHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
-    const firstStickyViewY = useSharedValue(1000000);
     const containerRef = useRef<View>(null);
     const scrollViewRef = useRef<View>(null);
+    const headerContainerLayouts = useRef<
+      Record<string, (LayoutRectangle & { stickyHeight?: number }) | undefined>
+    >({});
+    const headerViewPositions = useSharedValue({});
 
     const setCollapsibleHandlers = useCallback((handlers) => {
       collapsibleHandlers.current = handlers;
     }, []);
 
     const headerCollapsed = useDerivedValue(() => {
-      const maxY = fixedHeaderHeight.value - firstStickyViewY.value;
+      const maxY = fixedHeaderHeight.value;
       return scrollY.value >= maxY;
     }, []);
 
@@ -47,96 +37,50 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       return containerHeight.value + fixedHeaderHeight.value;
     }, []);
 
-    useAnimatedReaction(
-      () => {
-        const totalHeight = Object.keys(stickyViewPositions.value).reduce(
-          (acc, item) => {
-            const value = stickyViewPositions.value[item];
-            if (value) {
-              return acc + value.top;
+    const handleHeaderContainerLayout = useCallback(
+      (key: string, layout?: LayoutRectangle, stickyHeight?: number) => {
+        headerContainerLayouts.current[key] = layout
+          ? {
+              ...layout,
+              stickyHeight,
             }
-            return acc;
-          },
+          : undefined;
+        const headerContainers = Object.keys(
+          headerContainerLayouts.current
+        ).filter((k: string) => !!headerContainerLayouts.current[k]);
+        // Calculate total header height
+        const totalHeight = headerContainers.reduce(
+          (acc, value) =>
+            acc + (headerContainerLayouts.current[value]?.height ?? 0),
           0
         );
-        return totalHeight - fixedHeaderHeight.value;
-      },
-      (result, previous) => {
-        if (result !== previous) {
-          const viewPositions = stickyViewPositions.value;
-          const sortedKeys = Object.keys(viewPositions)
-            .filter((v) => !!viewPositions[v])
-            // @ts-ignore
-            .sort((a, b) => viewPositions[a].top - viewPositions[b].top);
-          let totalTop = 0;
-          const values: any = {};
-          for (let i = 0; i < sortedKeys.length; i++) {
-            // @ts-ignore
-            values[sortedKeys[i]] = totalTop;
-            // Try minus 1 make it filled when scrolling up.
-            // Otherwise, we can see a small space between the persits views
-            // @ts-ignore
-            totalTop += viewPositions[sortedKeys[i]].height - 1;
-          }
-          stickyViewTops.value = values;
-          // @ts-ignore
-          firstStickyViewY.value = viewPositions[sortedKeys[0]]?.top || 0;
-        }
-      }
-    );
-
-    const handleStickyViewLayout = useCallback(
-      (viewKey: string, viewRef?: React.RefObject<View>) => {
-        if (viewRef && viewRef.current && containerRef.current) {
-          stickyViewRefs.current[viewKey] = viewRef;
-          viewRef.current.measureLayout(
-            // @ts-ignore
-            containerRef.current,
-            (left, top, width, height) => {
-              stickyViewPositionsRef.current = {
-                ...stickyViewPositionsRef.current,
-                [viewKey]: { left, top, width, height },
-              };
-              // @ts-ignore
-              stickyViewPositions.value = stickyViewPositionsRef.current;
-            },
-            () => {}
+        headerHeight.value = withTiming(totalHeight, {
+          duration: fixedHeaderHeight.value === 0 ? 0 : 10,
+        });
+        fixedHeaderHeight.value = totalHeight;
+        // Calculate header positions
+        const sortedHeaders = headerContainers.sort((a, b) => {
+          return (
+            (headerContainerLayouts.current[a]?.y || 0) -
+            (headerContainerLayouts.current[b]?.y || 0)
           );
-        } else {
-          stickyViewRefs.current = {
-            ...stickyViewRefs.current,
-            [viewKey]: undefined,
+        });
+        const values: any = {};
+        let aStickyHeight = 0;
+        for (let index = 0; index < sortedHeaders.length; index++) {
+          const headerKey = sortedHeaders[index];
+          const sHeight =
+            headerContainerLayouts.current[headerKey]?.stickyHeight ?? 0;
+          values[headerKey] = {
+            top: aStickyHeight,
+            stickyHeight: sHeight,
           };
-          stickyViewPositionsRef.current = {
-            ...stickyViewPositionsRef.current,
-            [viewKey]: undefined,
-          };
-          // @ts-ignore
-          stickyViewPositions.value = stickyViewPositionsRef.current;
+          aStickyHeight += sHeight;
         }
+        headerViewPositions.value = values;
       },
       []
     );
-
-    const debounceRefreshStickyPositions = useMemo(() => {
-      return debounce(() => {
-        Object.keys(stickyViewRefs.current).forEach((key) => {
-          const viewRef = stickyViewRefs.current[key];
-          if (viewRef) {
-            handleStickyViewLayout(key, viewRef);
-          }
-        });
-      }, 200);
-    }, []);
-
-    const handleHeaderContainerLayout = useCallback((height: number) => {
-      headerHeight.value = withTiming(height, {
-        duration: fixedHeaderHeight.value === 0 ? 0 : 10,
-      });
-      fixedHeaderHeight.value = height;
-      // Try refresh sticky positions
-      debounceRefreshStickyPositions();
-    }, []);
 
     const handleContainerHeight = useCallback((height: number) => {
       containerHeight.value = height;
@@ -161,36 +105,28 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       () => ({
         scrollViewRef,
         containerRef,
-        handleStickyViewLayout,
         handleHeaderContainerLayout,
         setCollapsibleHandlers,
         handleContainerHeight,
-        firstStickyViewY,
-        stickyViewTops,
-        stickyViewPositions,
         fixedHeaderHeight,
         contentMinHeight,
+        headerViewPositions,
       }),
       [
         setCollapsibleHandlers,
-        handleStickyViewLayout,
         handleHeaderContainerLayout,
         handleContainerHeight,
-        firstStickyViewY,
-        stickyViewTops,
-        stickyViewPositions,
         fixedHeaderHeight,
         contentMinHeight,
+        headerViewPositions,
       ]
     );
 
     return (
       <CollapsibleContext.Provider value={context}>
         <InternalCollapsibleContext.Provider value={internalContext}>
-          <CollapsibleHeaderProvider>
-            {/** @ts-ignore */}
-            <Component {...props} />
-          </CollapsibleHeaderProvider>
+          {/** @ts-ignore */}
+          <Component {...props} />
         </InternalCollapsibleContext.Provider>
       </CollapsibleContext.Provider>
     );

@@ -1,12 +1,10 @@
-import { createContext, ReactNode, useContext } from 'react';
+import { createContext, useContext } from 'react';
+import { LayoutRectangle } from 'react-native';
+import Animated from 'react-native-reanimated';
 
-export type HeaderItem = { key: string; children: ReactNode };
-
-type CollapsibleContextHeaderType = {
-  headers: HeaderItem[];
-  mount: (key: string, header: ReactNode) => void;
-  update: (key: string, header: ReactNode) => void;
-  unmount: (key: string) => void;
+export type CollapsibleContextHeaderType = {
+  handleStickyViewLayout: (key: string, layout?: LayoutRectangle) => void;
+  animatedY: Animated.SharedValue<number>;
 };
 
 export const CollapsibleHeaderContext =

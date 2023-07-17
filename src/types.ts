@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { View } from 'react-native';
+import type { LayoutRectangle, View } from 'react-native';
 import type Animated from 'react-native-reanimated';
 
 export type ScrollToIndexParams = {
@@ -33,16 +33,16 @@ export type CollapsibleContextInternalType = {
   scrollViewRef: React.RefObject<any>;
   containerRef: React.RefObject<View>;
   contentMinHeight: Animated.SharedValue<number>;
-  firstStickyViewY: Animated.SharedValue<number>;
-  stickyViewPositions: Animated.SharedValue<Record<string, LayoutParams>>;
-  stickyViewTops: Animated.SharedValue<Record<string, number>>;
+  headerViewPositions: Animated.SharedValue<
+    Record<string, { top: number; stickyHeight: number }>
+  >;
   fixedHeaderHeight: Animated.SharedValue<number>;
   handleContainerHeight: (height: number) => void;
-  handleStickyViewLayout: (
-    viewKey: string,
-    viewRef?: React.RefObject<View>
+  handleHeaderContainerLayout: (
+    key: string,
+    layout?: LayoutRectangle,
+    stickyHeight?: number
   ) => void;
-  handleHeaderContainerLayout: (height: number) => void;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;
 };
 

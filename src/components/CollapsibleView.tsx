@@ -208,6 +208,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   headerTitle: {
-    flex: 1,
+    // flex: 1,
   },
 });
