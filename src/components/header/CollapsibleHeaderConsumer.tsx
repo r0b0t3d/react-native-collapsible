@@ -6,8 +6,10 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { CollapsibleHeaderConsumerContext } from '../../hooks/useCollapsibleHeaderConsumerContext';
+import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
+import { withTiming } from 'react-native-reanimated';
 
 export type HeaderItem = { key: string; children: ReactNode };
 
@@ -18,6 +20,7 @@ export default function CollapsibleHeaderConsumer({
 }) {
   const [headers, setHeaders] = useState<HeaderItem[]>([]);
   const mounted = useRef(false);
+  const { fixedHeaderHeight, headerHeight } = useInternalCollapsibleContext();
 
   useEffect(() => {
     mounted.current = true;
@@ -61,10 +64,25 @@ export default function CollapsibleHeaderConsumer({
     [headers, mount, unmount, update]
   );
 
+  const handleLayout = useCallback(
+    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+      const { height } = layout;
+      headerHeight.value = withTiming(height, {
+        duration: fixedHeaderHeight.value === 0 ? 0 : 10,
+      });
+      fixedHeaderHeight.value = height;
+    },
+    [headerHeight, fixedHeaderHeight]
+  );
+
   return (
     <CollapsibleHeaderConsumerContext.Provider value={context}>
       {children}
-      <View style={styles.container} pointerEvents="box-none">
+      <View
+        style={styles.container}
+        pointerEvents="box-none"
+        onLayout={handleLayout}
+      >
         {headers.map((item) => item.children)}
       </View>
     </CollapsibleHeaderConsumerContext.Provider>

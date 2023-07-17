@@ -3,11 +3,7 @@ import React, { useCallback, useMemo, useRef, FC } from 'react';
 import type { CollapsibleHandles } from './types';
 import { CollapsibleContext } from './hooks/useCollapsibleContext';
 import { InternalCollapsibleContext } from './hooks/useInternalCollapsibleContext';
-import {
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 import type { LayoutRectangle, View } from 'react-native';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
@@ -47,16 +43,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         const headerContainers = Object.keys(
           headerContainerLayouts.current
         ).filter((k: string) => !!headerContainerLayouts.current[k]);
-        // Calculate total header height
-        const totalHeight = headerContainers.reduce(
-          (acc, value) =>
-            acc + (headerContainerLayouts.current[value]?.height ?? 0),
-          0
-        );
-        headerHeight.value = withTiming(totalHeight, {
-          duration: fixedHeaderHeight.value === 0 ? 0 : 10,
-        });
-        fixedHeaderHeight.value = totalHeight;
         // Calculate header positions
         const sortedHeaders = headerContainers.sort((a, b) => {
           return (
@@ -108,6 +94,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         handleHeaderContainerLayout,
         setCollapsibleHandlers,
         handleContainerHeight,
+        headerHeight,
         fixedHeaderHeight,
         contentMinHeight,
         headerViewPositions,
@@ -116,6 +103,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         setCollapsibleHandlers,
         handleHeaderContainerLayout,
         handleContainerHeight,
+        headerHeight,
         fixedHeaderHeight,
         contentMinHeight,
         headerViewPositions,

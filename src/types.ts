@@ -37,6 +37,7 @@ export type CollapsibleContextInternalType = {
     Record<string, { top: number; stickyHeight: number }>
   >;
   fixedHeaderHeight: Animated.SharedValue<number>;
+  headerHeight: Animated.SharedValue<number>;
   handleContainerHeight: (height: number) => void;
   handleHeaderContainerLayout: (
     key: string,

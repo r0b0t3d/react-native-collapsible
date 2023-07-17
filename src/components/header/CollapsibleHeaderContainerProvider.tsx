@@ -95,7 +95,7 @@ export default function CollapsibleHeaderContainerProvider({
   const translateY = useDerivedValue(() => {
     const position = headerViewPositions.value[contentKey];
     if (!currentLayout.value || !position) {
-      return scrollY.value;
+      return 0;
     }
     const topPosition =
       currentLayout.value.height +
