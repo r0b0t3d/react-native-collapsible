@@ -51,8 +51,8 @@ export default function StickyView({ children, style }: Props) {
 
     return interpolate(
       animatedY.value,
-      [0, topValue, topValue + stickyHeight + 100],
-      [0, 0, stickyHeight + 100],
+      [0, topValue, topValue + stickyHeight + 100000],
+      [0, 0, stickyHeight + 100000],
       Extrapolate.CLAMP
     );
   }, []);
