@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {
   useCallback,
   useEffect,
@@ -43,11 +42,11 @@ export default function CollapsibleSectionList<Data>({
     };
   }, []);
 
-  const scrollTo = useCallback((yValue: number, animated = true) => {
+  const scrollTo = useCallback(() => {
     console.warn('Not supported');
   }, []);
 
-  const scrollToIndex = useCallback((params) => {
+  const scrollToIndex = useCallback(() => {
     console.warn('Not supported');
   }, []);
 
