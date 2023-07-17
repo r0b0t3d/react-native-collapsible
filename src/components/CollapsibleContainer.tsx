@@ -11,6 +11,7 @@ import {
 import useKeyboardShowEvent from '../hooks/useKeyboardShowEvent';
 import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import CollapsibleHeaderConsumer from './header/CollapsibleHeaderConsumer';
 
 type Props = Omit<ViewProps, 'ref' | 'onLayout'> & {
   children: Element;
@@ -24,8 +25,8 @@ export default function CollapsibleContainer({
   textInputRefs = [],
   ...props
 }: Props) {
-  const { containerRef, handleContainerHeight } =
-    useInternalCollapsibleContext();
+  const containerRef = useRef<View>(null);
+  const { handleContainerHeight } = useInternalCollapsibleContext();
   const { scrollY, scrollTo } = useCollapsibleContext();
 
   const containerHeight = useRef(0);
@@ -74,7 +75,7 @@ export default function CollapsibleContainer({
         onLayout={handleContainerLayout}
         collapsable={false}
       >
-        {children}
+        <CollapsibleHeaderConsumer>{children}</CollapsibleHeaderConsumer>
       </View>
     </KeyboardAvoidingView>
   );

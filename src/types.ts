@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { LayoutRectangle, View } from 'react-native';
+import type { LayoutRectangle } from 'react-native';
 import type Animated from 'react-native-reanimated';
 
 export type ScrollToIndexParams = {
@@ -31,7 +31,6 @@ export type LayoutParams = {
 
 export type CollapsibleContextInternalType = {
   scrollViewRef: React.RefObject<any>;
-  containerRef: React.RefObject<View>;
   contentMinHeight: Animated.SharedValue<number>;
   headerViewPositions: Animated.SharedValue<
     Record<string, { top: number; stickyHeight: number }>

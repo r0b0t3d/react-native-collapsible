@@ -17,7 +17,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const scrollY = useSharedValue(0);
     const fixedHeaderHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
-    const containerRef = useRef<View>(null);
     const scrollViewRef = useRef<View>(null);
     const headerContainerLayouts = useRef<
       Record<string, (LayoutRectangle & { stickyHeight?: number }) | undefined>
@@ -104,7 +103,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const internalContext = useMemo(
       () => ({
         scrollViewRef,
-        containerRef,
         handleHeaderContainerLayout,
         setCollapsibleHandlers,
         handleContainerHeight,
