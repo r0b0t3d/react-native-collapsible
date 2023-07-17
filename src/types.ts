@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { LayoutRectangle } from 'react-native';
+import type { LayoutRectangle, SectionListScrollParams } from 'react-native';
 import type Animated from 'react-native-reanimated';
 
 export type ScrollToIndexParams = {
@@ -14,6 +14,7 @@ export type CollapsibleHandles = {
   expand: () => void;
   scrollTo: (offset: number, animate?: boolean) => void;
   scrollToIndex: (params: ScrollToIndexParams) => void;
+  scrollToLocation: (params: SectionListScrollParams) => void;
 };
 
 export type CollapsibleContextType = CollapsibleHandles & {

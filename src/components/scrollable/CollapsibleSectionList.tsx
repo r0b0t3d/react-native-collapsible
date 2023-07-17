@@ -5,7 +5,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, StyleSheet, SectionList, SectionListProps } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  SectionList,
+  SectionListProps,
+  SectionListScrollParams,
+} from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
@@ -50,10 +56,18 @@ export default function CollapsibleSectionList<Data>({
     console.warn('Not supported');
   }, []);
 
+  const scrollToLocation = useCallback(
+    (params: SectionListScrollParams) => {
+      scrollViewRef.current?.scrollToLocation(params);
+    },
+    [scrollViewRef]
+  );
+
   const { scrollHandler } = useAnimatedScroll({
     headerSnappable,
     scrollTo,
     scrollToIndex,
+    scrollToLocation,
   });
 
   const handleInternalContentHeight = useCallback((value: number) => {

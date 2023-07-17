@@ -94,6 +94,8 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
           collapsibleHandlers.current?.scrollTo(offset, animate),
         scrollToIndex: (params: any) =>
           collapsibleHandlers.current?.scrollToIndex(params),
+        scrollToLocation: (params: any) =>
+          collapsibleHandlers.current?.scrollToLocation(params),
         headerHeight,
         scrollY,
         headerCollapsed,

@@ -14,19 +14,24 @@ export default function CollapsibleHeaderContainer({
   children,
   containerStyle,
 }: Props) {
-  const contentKey = useMemo(() => `collapsible-header-${key++}`, []);
+  const originalKey = useMemo(() => key++, []);
+  const contentKey = useMemo(
+    () => `collapsible-header-${originalKey}`,
+    [originalKey]
+  );
   const { mount, unmount, update } = useCollapsibleHeaderConsumerContext();
 
   const internalStyle = useMemo(() => {
     return {
-      zIndex: 100000 - key,
+      zIndex: 100000 - key - originalKey,
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, originalKey]);
 
   const content = useMemo(() => {
     return (
       <CollapsibleHeaderContainerProvider
-        containerStyle={[containerStyle, internalStyle]}
+        containerStyle={[internalStyle, containerStyle]}
         contentKey={contentKey}
         key={contentKey}
       >

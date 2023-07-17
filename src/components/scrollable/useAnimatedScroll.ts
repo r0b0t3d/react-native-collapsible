@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect } from 'react';
-import { Dimensions } from 'react-native';
+import { Dimensions, SectionListScrollParams } from 'react-native';
 import {
   runOnJS,
   useAnimatedScrollHandler,
@@ -16,12 +16,14 @@ type Props = {
   headerSnappable: boolean;
   scrollTo: (yValue: number, animated?: boolean) => void;
   scrollToIndex: (params: ScrollToIndexParams) => void;
+  scrollToLocation: (params: SectionListScrollParams) => void;
 };
 
 export default function useAnimatedScroll({
   headerSnappable,
   scrollTo,
   scrollToIndex,
+  scrollToLocation,
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
   const { scrollY } = useCollapsibleContext();
@@ -49,8 +51,16 @@ export default function useAnimatedScroll({
       expand,
       scrollTo,
       scrollToIndex,
+      scrollToLocation,
     });
-  }, [setCollapsibleHandlers, collapse, expand, scrollTo, scrollToIndex]);
+  }, [
+    setCollapsibleHandlers,
+    collapse,
+    expand,
+    scrollTo,
+    scrollToIndex,
+    scrollToLocation,
+  ]);
 
   const scrollHandler = useAnimatedScrollHandler(
     {

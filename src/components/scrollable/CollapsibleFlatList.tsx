@@ -54,10 +54,15 @@ export default function CollapsibleFlatList<Data>({
     scrollViewRef.current?.scrollToIndex(params);
   }, []);
 
+  const scrollToLocation = useCallback(() => {
+    console.warn('CollapsibleFlatList does not support scrollToLocation');
+  }, []);
+
   const { scrollHandler } = useAnimatedScroll({
     headerSnappable,
     scrollTo,
     scrollToIndex,
+    scrollToLocation,
   });
 
   const handleInternalContentHeight = useCallback((value: number) => {
