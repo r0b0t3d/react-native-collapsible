@@ -14,6 +14,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const fixedHeaderHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
     const scrollViewRef = useRef<View>(null);
+    const containerRef = useRef<View>(null);
     const headerContainerLayouts = useRef<
       Record<string, (LayoutRectangle & { stickyHeight?: number }) | undefined>
     >({});
@@ -71,6 +72,41 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       containerHeight.value = height;
     }, []);
 
+    const handleScrollToView = useCallback(
+      (ref: React.RefObject<any>, animated?: boolean) => {
+        ref.current.measureLayout(
+          containerRef.current,
+          (_left: number, top: number, _width: number, _height: number) => {
+            const headerContainers = Object.keys(
+              headerContainerLayouts.current
+            ).filter((k: string) => {
+              const layout = headerContainerLayouts.current[k];
+              if (layout) {
+                return layout.y + layout.height < top;
+              }
+              return false;
+            });
+            const stickyHeightAbove = headerContainers.reduce((acc, key) => {
+              const layout = headerContainerLayouts.current[key];
+              acc += layout?.stickyHeight ?? 0;
+              return acc;
+            }, 0);
+            console.log({
+              top,
+              stickyHeightAbove,
+            });
+            //
+            collapsibleHandlers.current?.scrollTo(
+              top - stickyHeightAbove,
+              animated
+            );
+          },
+          () => {}
+        );
+      },
+      []
+    );
+
     const context = useMemo(() => {
       return {
         collapse: (animated?: boolean) =>
@@ -85,11 +121,13 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         headerHeight,
         scrollY,
         headerCollapsed,
+        scrollToView: handleScrollToView,
       };
-    }, [scrollY, headerHeight, headerCollapsed]);
+    }, [scrollY, headerHeight, headerCollapsed, handleScrollToView]);
 
     const internalContext = useMemo(
       () => ({
+        containerRef,
         scrollViewRef,
         handleHeaderContainerLayout,
         setCollapsibleHandlers,

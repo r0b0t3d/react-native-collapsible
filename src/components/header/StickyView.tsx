@@ -1,11 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   LayoutChangeEvent,
   LayoutRectangle,
   StyleProp,
   StyleSheet,
-  View,
   ViewStyle,
 } from 'react-native';
 import Animated, {
@@ -20,13 +19,13 @@ import useCollapsibleHeaderContext from '../../hooks/useCollapsibleHeaderContext
 type Props = {
   style?: StyleProp<ViewStyle>;
   children: Element;
+  stickyRef?: React.MutableRefObject<any>;
 };
 
 let stickyKey = 0;
 
-export default function StickyView({ children, style }: Props) {
+export default function StickyView({ children, style, stickyRef }: Props) {
   const key = useMemo(() => `sticky_${stickyKey++}`, []);
-  const viewRef = useRef<View>(null);
   const { handleStickyViewLayout, animatedY } = useCollapsibleHeaderContext();
   const currentLayout = useSharedValue<LayoutRectangle | undefined>(undefined);
 
@@ -71,7 +70,7 @@ export default function StickyView({ children, style }: Props) {
     <Animated.View
       key={key}
       // @ts-ignore
-      ref={viewRef}
+      ref={stickyRef}
       onLayout={handleLayout}
       style={[styles.container, style, animatedStyle]}
       pointerEvents="box-none"

@@ -25,8 +25,8 @@ export default function CollapsibleContainer({
   textInputRefs = [],
   ...props
 }: Props) {
-  const containerRef = useRef<View>(null);
-  const { handleContainerHeight } = useInternalCollapsibleContext();
+  const { handleContainerHeight, containerRef } =
+    useInternalCollapsibleContext();
   const { scrollY, scrollTo } = useCollapsibleContext();
 
   const containerHeight = useRef(0);

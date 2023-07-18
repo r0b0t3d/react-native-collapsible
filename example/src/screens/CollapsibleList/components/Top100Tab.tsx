@@ -4,13 +4,15 @@ import {
   StickyView,
   useCollapsibleContext,
 } from '@r0b0t3d/react-native-collapsible';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function Top100Tab() {
-  const { collapse } = useCollapsibleContext();
+  const { scrollToView } = useCollapsibleContext();
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
   const [isLoading, setLoading] = React.useState(true);
+  const sticky1 = useRef<View>();
+  const sticky2 = useRef<View>();
 
   const handleRefresh = useCallback(() => {
     setLoading(true);
@@ -36,24 +38,24 @@ export default function Top100Tab() {
     <>
       <CollapsibleHeaderContainer>
         <View style={styles.headerView} />
-        <StickyView>
+        <StickyView stickyRef={sticky1}>
           <View style={styles.searchBox}>
             <TextInput
               placeholder="Looking for..."
               style={styles.search}
-              onFocus={() => collapse()}
+              onFocus={() => scrollToView(sticky1, true)}
             />
           </View>
         </StickyView>
       </CollapsibleHeaderContainer>
       <CollapsibleHeaderContainer>
         <View style={styles.headerView} />
-        <StickyView>
+        <StickyView stickyRef={sticky2}>
           <View style={styles.searchBox}>
             <TextInput
               placeholder="Looking for..."
               style={styles.search}
-              onFocus={() => collapse()}
+              onFocus={() => scrollToView(sticky2)}
             />
           </View>
         </StickyView>

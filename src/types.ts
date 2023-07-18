@@ -10,7 +10,16 @@ export type ScrollToIndexParams = {
 };
 
 export type CollapsibleHandles = {
+  /**
+   * Collapse the header by header height
+   * @param animated
+   * @returns
+   */
   collapse: (animated?: boolean) => void;
+  /**
+   * Expand header
+   * @returns
+   */
   expand: () => void;
   scrollTo: (offset: number, animate?: boolean) => void;
   scrollToIndex: (params: ScrollToIndexParams) => void;
@@ -21,6 +30,13 @@ export type CollapsibleContextType = CollapsibleHandles & {
   scrollY: Animated.SharedValue<number>;
   headerHeight: Animated.SharedValue<number>;
   headerCollapsed: Animated.SharedValue<boolean>;
+  /**
+   * Scroll to specific view
+   * @param ref View that you want to scroll to
+   * @param animated
+   * @returns
+   */
+  scrollToView: (ref: React.RefObject<any>, animated?: boolean) => void;
 };
 
 export type LayoutParams = {
@@ -32,6 +48,7 @@ export type LayoutParams = {
 
 export type CollapsibleContextInternalType = {
   scrollViewRef: React.RefObject<any>;
+  containerRef: React.RefObject<any>;
   contentMinHeight: Animated.SharedValue<number>;
   headerViewPositions: Animated.SharedValue<
     Record<string, { top: number; stickyHeight: number }>

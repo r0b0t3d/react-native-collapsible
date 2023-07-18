@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 10,
     marginBottom: 10,
+    height: 40,
   },
   tab: {
     flex: 1,
