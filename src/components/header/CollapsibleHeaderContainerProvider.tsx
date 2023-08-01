@@ -63,7 +63,9 @@ export default function CollapsibleHeaderContainerProvider({
       if (!currentLayout.value) {
         return -1;
       }
-      return currentLayout.value.height - stickyHeight.value;
+      return (
+        currentLayout.value.height - currentLayout.value.y - stickyHeight.value
+      );
     },
     (result, previous) => {
       if (result !== -1 && result !== previous) {

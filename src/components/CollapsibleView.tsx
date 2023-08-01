@@ -93,7 +93,7 @@ export default function CollapsibleView({
   useAnimatedReaction(
     () => (collapseState.value === 0 ? 0 : collapseState.value === 1 ? 1 : 0),
     (result, prev) => {
-      if (result === prev) {
+      if (prev === null || result === prev) {
         return;
       }
       if (onToggle) {
@@ -158,7 +158,7 @@ export function CollapsibleHeaderText({
   iconInitialAngle = 0,
   children,
 }: {
-  title: string | Element;
+  title: string | ReactNode;
   style?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<TextStyle>;
   icon?: ReactNode;

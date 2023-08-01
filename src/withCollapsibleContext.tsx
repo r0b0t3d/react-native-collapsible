@@ -91,11 +91,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
               acc += layout?.stickyHeight ?? 0;
               return acc;
             }, 0);
-            console.log({
-              top,
-              stickyHeightAbove,
-            });
-            //
             collapsibleHandlers.current?.scrollTo(
               top - stickyHeightAbove,
               animated
