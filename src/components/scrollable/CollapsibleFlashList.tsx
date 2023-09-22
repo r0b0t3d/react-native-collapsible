@@ -1,17 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { FlatListProps, View, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
 } from 'react-native-reanimated';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
 import useAnimatedScroll from './useAnimatedScroll';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 import type { CollapsibleProps } from '../../types';
@@ -20,7 +14,7 @@ import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
-type Props<Data> = Omit<FlatListProps<Data>, 'scrollEnabled'> &
+type Props<Data> = Omit<FlashListProps<Data>, 'scrollEnabled'> &
   CollapsibleProps;
 
 export default function CollapsibleFlatList<Data>({
@@ -28,13 +22,8 @@ export default function CollapsibleFlatList<Data>({
   ...props
 }: Props<Data>) {
   const { headerHeight } = useCollapsibleContext();
-  const { contentMinHeight, scrollViewRef, fixedHeaderHeight } =
-    useInternalCollapsibleContext();
+  const { scrollViewRef, fixedHeaderHeight } = useInternalCollapsibleContext();
   const mounted = useRef(true);
-  const contentHeight = useRef(0);
-  const [internalContentMinHeight, setInternalContentMinHeight] = useState(
-    contentMinHeight.value
-  );
   const [internalProgressViewOffset, setInternalProgressViewOffset] =
     useState(0);
 
@@ -66,33 +55,11 @@ export default function CollapsibleFlatList<Data>({
     scrollToLocation,
   });
 
-  const handleInternalContentHeight = useCallback((value: number) => {
-    if (mounted.current) {
-      setInternalContentMinHeight(value);
-    }
-  }, []);
-
   const handleInternalProgressViewOffset = useCallback((value: number) => {
     if (mounted.current) {
       setInternalProgressViewOffset(value);
     }
   }, []);
-
-  useAnimatedReaction(
-    () => {
-      return contentMinHeight.value;
-    },
-    (result, previous) => {
-      if (result !== previous) {
-        if (
-          contentHeight.current < result &&
-          internalContentMinHeight !== result
-        ) {
-          runOnJS(handleInternalContentHeight)(result);
-        }
-      }
-    }
-  );
 
   useAnimatedReaction(
     () => {
@@ -104,19 +71,6 @@ export default function CollapsibleFlatList<Data>({
       }
     }
   );
-
-  const contentContainerStyle = useMemo(
-    () => [
-      styles.contentContainer,
-      { minHeight: internalContentMinHeight },
-      props.contentContainerStyle,
-    ],
-    [props.contentContainerStyle, internalContentMinHeight]
-  );
-
-  const handleContentSizeChange = useCallback((_, height) => {
-    contentHeight.current = height;
-  }, []);
 
   const handleScrollToIndexFailed = useCallback(() => {}, []);
 
@@ -130,22 +84,21 @@ export default function CollapsibleFlatList<Data>({
   }
 
   return (
-    <AnimatedFlashList
-      ref={scrollViewRef}
-      keyboardDismissMode="on-drag"
-      keyboardShouldPersistTaps="handled"
-      scrollEventThrottle={1}
-      onScrollToIndexFailed={handleScrollToIndexFailed}
-      {...props}
-      style={[styles.container, props.style]}
-      //@ts-ignore
-      contentContainerStyle={contentContainerStyle}
-      onScroll={scrollHandler}
-      ListHeaderComponent={renderListHeader()}
-      onContentSizeChange={handleContentSizeChange}
-      simultaneousHandlers={[]}
-      progressViewOffset={internalProgressViewOffset}
-    />
+    <View style={[styles.container, props.style]}>
+      <AnimatedFlashList
+        ref={scrollViewRef}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        scrollEventThrottle={1}
+        onScrollToIndexFailed={handleScrollToIndexFailed}
+        {...props}
+        onScroll={scrollHandler}
+        ListHeaderComponent={renderListHeader()}
+        //@ts-ignore
+        simultaneousHandlers={[]}
+        progressViewOffset={internalProgressViewOffset}
+      />
+    </View>
   );
 }
 
