@@ -4,6 +4,7 @@ import { View, StyleSheet } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
+  useDerivedValue,
 } from 'react-native-reanimated';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import useAnimatedScroll from './useAnimatedScroll';
@@ -22,7 +23,8 @@ export default function CollapsibleFlatList<Data>({
   ...props
 }: Props<Data>) {
   const { headerHeight } = useCollapsibleContext();
-  const { scrollViewRef, fixedHeaderHeight } = useInternalCollapsibleContext();
+  const { scrollViewRef, fixedHeaderHeight, contentMinHeight } =
+    useInternalCollapsibleContext();
   const mounted = useRef(true);
   const [internalProgressViewOffset, setInternalProgressViewOffset] =
     useState(0);
@@ -61,6 +63,10 @@ export default function CollapsibleFlatList<Data>({
     }
   }, []);
 
+  const additionalBottomHeight = useDerivedValue(() => {
+    return contentMinHeight.value - fixedHeaderHeight.value;
+  });
+
   useAnimatedReaction(
     () => {
       return fixedHeaderHeight.value;
@@ -83,6 +89,15 @@ export default function CollapsibleFlatList<Data>({
     );
   }
 
+  function renderListFooter() {
+    return (
+      <View>
+        {props.ListFooterComponent}
+        <AnimatedTopView height={additionalBottomHeight} />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, props.style]}>
       <AnimatedFlashList
@@ -94,6 +109,7 @@ export default function CollapsibleFlatList<Data>({
         {...props}
         onScroll={scrollHandler}
         ListHeaderComponent={renderListHeader()}
+        ListFooterComponent={renderListFooter()}
         //@ts-ignore
         simultaneousHandlers={[]}
         progressViewOffset={internalProgressViewOffset}

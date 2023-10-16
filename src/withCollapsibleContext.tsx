@@ -74,6 +74,9 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
 
     const handleScrollToView = useCallback(
       (ref: React.RefObject<any>, animated?: boolean) => {
+        if (!ref.current) {
+          return;
+        }
         ref.current.measureLayout(
           containerRef.current,
           (_left: number, top: number, _width: number, _height: number) => {

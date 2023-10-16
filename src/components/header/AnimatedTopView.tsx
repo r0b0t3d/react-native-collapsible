@@ -8,7 +8,7 @@ type Props = {
 export default function AnimatedTopView({ height }: Props) {
   const contentStyle = useAnimatedStyle(
     () => ({
-      paddingTop: height.value,
+      height: height.value,
     }),
     []
   );
