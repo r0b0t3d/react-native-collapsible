@@ -88,7 +88,7 @@ export default function CollapsibleLegendList<Data>({
   });
 
   return (
-    <View style={[styles.container, props.style]}>
+    <View style={[StyleSheet.absoluteFill, props.style]}>
       {/* @ts-ignore */}
       <AnimatedLegendList
         ref={scrollViewRef}
@@ -106,18 +106,3 @@ export default function CollapsibleLegendList<Data>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  contentContainer: {
-    flexGrow: 1,
-  },
-  topView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
-});

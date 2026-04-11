@@ -106,7 +106,7 @@ export default function CollapsibleScrollView({
         ) : undefined
       }
       {...props}
-      style={[styles.container, props.style]}
+      style={[StyleSheet.absoluteFill, props.style]}
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       keyboardDismissMode="on-drag"
@@ -122,9 +122,6 @@ export default function CollapsibleScrollView({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-  },
   contentContainer: {
     flexGrow: 1,
   },

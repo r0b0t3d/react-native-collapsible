@@ -141,7 +141,7 @@ export default function CollapsibleSectionList<Data>({
       scrollEventThrottle={1}
       onScrollToIndexFailed={handleScrollToIndexFailed}
       {...props}
-      style={[styles.container, props.style]}
+      style={[StyleSheet.absoluteFill, props.style]}
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
@@ -154,9 +154,6 @@ export default function CollapsibleSectionList<Data>({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-  },
   contentContainer: {
     flexGrow: 1,
   },
