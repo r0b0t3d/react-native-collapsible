@@ -13,7 +13,7 @@ import useCollapsibleContext from '../hooks/useCollapsibleContext';
 import CollapsibleHeaderConsumer from './header/CollapsibleHeaderConsumer';
 
 type Props = Omit<ViewProps, 'ref' | 'onLayout'> & {
-  children: Element;
+  children: React.ReactNode;
   KeyboardAvoidingViewComponent?: typeof KeyboardAvoidingView;
   keyboardAvoidingViewProps?: KeyboardAvoidingViewProps;
   textInputRefs?: any[];

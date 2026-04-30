@@ -18,7 +18,7 @@ import useCollapsibleHeaderContext from '../../hooks/useCollapsibleHeaderContext
 
 type Props = {
   style?: StyleProp<ViewStyle>;
-  children: Element;
+  children: React.ReactNode;
   stickyRef?: React.MutableRefObject<any>;
 };
 
