@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useId } from 'react';
 import {
   LayoutChangeEvent,
   LayoutRectangle,
@@ -8,7 +7,6 @@ import {
   ViewStyle,
 } from 'react-native';
 import Animated, {
-  Extrapolate,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
@@ -22,24 +20,20 @@ type Props = {
   stickyRef?: React.MutableRefObject<any>;
 };
 
-let stickyKey = 0;
-
 export default function StickyView({ children, style, stickyRef }: Props) {
-  const key = useMemo(() => `sticky_${stickyKey++}`, []);
+  const key = `sticky_${useId()}`;
   const { handleStickyViewLayout, animatedY } = useCollapsibleHeaderContext();
   const currentLayout = useSharedValue<LayoutRectangle | undefined>(undefined);
 
   useEffect(() => {
     return () => handleStickyViewLayout(key, undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  const handleLayout = useCallback(
-    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
-      currentLayout.value = layout;
-      handleStickyViewLayout(key, layout);
-    },
-    [key, handleStickyViewLayout]
-  );
+  const handleLayout = ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+    currentLayout.set(layout);
+    handleStickyViewLayout(key, layout);
+  };
 
   const translateY = useDerivedValue(() => {
     if (!currentLayout.value) {
@@ -52,7 +46,7 @@ export default function StickyView({ children, style, stickyRef }: Props) {
       animatedY.value,
       [0, topValue, topValue + stickyHeight + 100000],
       [0, 0, stickyHeight + 100000],
-      Extrapolate.CLAMP
+      'clamp'
     );
   }, []);
 
@@ -69,7 +63,6 @@ export default function StickyView({ children, style, stickyRef }: Props) {
   return (
     <Animated.View
       key={key}
-      // @ts-ignore
       ref={stickyRef}
       onLayout={handleLayout}
       style={[styles.container, style, animatedStyle]}

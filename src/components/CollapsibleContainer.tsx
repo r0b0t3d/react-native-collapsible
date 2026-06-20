@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useLayoutEffect } from 'react';
+import React, { useCallback, useLayoutEffect } from 'react';
 import {
   KeyboardAvoidingView,
   KeyboardAvoidingViewProps,
@@ -28,7 +28,7 @@ function CollapsibleContainer({
   const { containerHeight, containerRef } = useInternalCollapsibleContext();
   const { scrollY, scrollTo } = useCollapsibleContext();
 
-  useKeyboardShowEvent(() => {
+  const handleKeyboardShow = useCallback(() => {
     textInputRefs.some((ref) => {
       const isFocusedFunc = ref.current.isFocused;
       const isFocused =
@@ -51,7 +51,16 @@ function CollapsibleContainer({
       }
       return isFocused;
     });
-  });
+  }, [
+    textInputRefs,
+    containerRef,
+    containerHeight,
+    scrollY,
+    scrollTo,
+    keyboardAvoidingViewProps?.keyboardVerticalOffset,
+  ]);
+
+  useKeyboardShowEvent(handleKeyboardShow);
 
   return (
     <KeyboardAvoidingViewComponent

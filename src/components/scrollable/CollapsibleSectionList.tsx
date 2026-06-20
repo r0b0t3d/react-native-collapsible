@@ -6,7 +6,6 @@ import React, {
   useState,
 } from 'react';
 import {
-  View,
   StyleSheet,
   SectionList,
   SectionListProps,
@@ -15,6 +14,7 @@ import {
 import Animated, {
   runOnJS,
   useAnimatedReaction,
+  useAnimatedStyle,
 } from 'react-native-reanimated';
 import useAnimatedScroll from './useAnimatedScroll';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
@@ -35,10 +35,6 @@ export default function CollapsibleSectionList<Data>({
   const { contentMinHeight, scrollViewRef, fixedHeaderHeight } =
     useInternalCollapsibleContext();
   const mounted = useRef(true);
-  const contentHeight = useRef(0);
-  const [internalContentMinHeight, setInternalContentMinHeight] = useState(
-    contentMinHeight.value
-  );
   const [internalProgressViewOffset, setInternalProgressViewOffset] =
     useState(0);
 
@@ -70,33 +66,11 @@ export default function CollapsibleSectionList<Data>({
     scrollToLocation,
   });
 
-  const handleInternalContentHeight = useCallback((value: number) => {
-    if (mounted.current) {
-      setInternalContentMinHeight(value);
-    }
-  }, []);
-
   const handleInternalProgressViewOffset = useCallback((value: number) => {
     if (mounted.current) {
       setInternalProgressViewOffset(value);
     }
   }, []);
-
-  useAnimatedReaction(
-    () => {
-      return contentMinHeight.value;
-    },
-    (result, previous) => {
-      if (result !== previous) {
-        if (
-          contentHeight.current < result &&
-          internalContentMinHeight !== result
-        ) {
-          runOnJS(handleInternalContentHeight)(result);
-        }
-      }
-    }
-  );
 
   useAnimatedReaction(
     () => {
@@ -109,27 +83,34 @@ export default function CollapsibleSectionList<Data>({
     }
   );
 
-  const contentContainerStyle = useMemo(
-    () => [
-      styles.contentContainer,
-      { minHeight: internalContentMinHeight },
-      props.contentContainerStyle,
-    ],
-    [props.contentContainerStyle, internalContentMinHeight]
+  // Animate minHeight on the UI thread instead of bouncing through React state.
+  // Skip applying minHeight when the value is 0 to avoid forcing a 0-height
+  // layout on the first frame before the container has been measured.
+  const listHeaderStyle = useAnimatedStyle(
+    () => ({
+      minHeight:
+        contentMinHeight.value > 0 ? contentMinHeight.value : undefined,
+    }),
+    []
   );
 
-  const handleContentSizeChange = useCallback((_, height) => {
-    contentHeight.current = height;
-  }, []);
+  const contentContainerStyle = useMemo(
+    () => [styles.contentContainer, props.contentContainerStyle],
+    [props.contentContainerStyle]
+  );
 
   const handleScrollToIndexFailed = useCallback(() => {}, []);
 
+  const ListHeaderComponent = props.ListHeaderComponent;
   function renderListHeader() {
     return (
-      <View>
+      <Animated.View style={listHeaderStyle}>
         <AnimatedTopView height={headerHeight} />
-        {props.ListHeaderComponent}
-      </View>
+        {ListHeaderComponent &&
+          (React.isValidElement(ListHeaderComponent)
+            ? ListHeaderComponent
+            : React.createElement(ListHeaderComponent as React.ComponentType))}
+      </Animated.View>
     );
   }
 
@@ -145,7 +126,6 @@ export default function CollapsibleSectionList<Data>({
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
-      onContentSizeChange={handleContentSizeChange}
       //@ts-ignore
       simultaneousHandlers={[]}
       progressViewOffset={internalProgressViewOffset}

@@ -8,7 +8,7 @@ import type { LayoutRectangle, View } from 'react-native';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
-    const collapsibleHandlers = useRef<CollapsibleHandles>();
+    const collapsibleHandlers = useRef<CollapsibleHandles>(null);
     const headerHeight = useSharedValue(0);
     const scrollY = useSharedValue(0);
     const fixedHeaderHeight = useSharedValue(0);
@@ -20,9 +20,12 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     >({});
     const headerViewPositions = useSharedValue({});
 
-    const setCollapsibleHandlers = useCallback((handlers) => {
-      collapsibleHandlers.current = handlers;
-    }, []);
+    const setCollapsibleHandlers = useCallback(
+      (handlers: CollapsibleHandles) => {
+        collapsibleHandlers.current = handlers;
+      },
+      []
+    );
 
     const headerCollapsed = useDerivedValue(() => {
       const maxY = fixedHeaderHeight.value;

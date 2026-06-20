@@ -1,8 +1,11 @@
 import React from 'react';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 
 type Props = {
-  height: Animated.SharedValue<number>;
+  height: SharedValue<number>;
 };
 
 export default function AnimatedTopView({ height }: Props) {

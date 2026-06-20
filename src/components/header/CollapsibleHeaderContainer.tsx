@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo } from 'react';
+import React, { ReactNode, useEffect, useId, useMemo, useRef } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
 import useCollapsibleHeaderConsumerContext from '../../hooks/useCollapsibleHeaderConsumerContext';
 import CollapsibleHeaderContainerProvider from './CollapsibleHeaderContainerProvider';
@@ -8,25 +8,30 @@ type Props = {
   containerStyle?: StyleProp<ViewStyle>;
 };
 
-let key = 0;
+// Module-scoped monotonic counter used only to assign zIndex to *new* instances
+// (see useInstanceZIndex below). Bounded by app lifetime; wraparound after ~100k
+// instances may cause one frame of incorrect layering.
+let nextZIndex = 0;
+function useInstanceZIndex(): number {
+  const ref = useRef<number | null>(null);
+  if (ref.current === null) {
+    ref.current = nextZIndex++;
+  }
+  return ref.current;
+}
 
 export default function CollapsibleHeaderContainer({
   children,
   containerStyle,
 }: Props) {
-  const originalKey = useMemo(() => key++, []);
-  const contentKey = useMemo(
-    () => `collapsible-header-${originalKey}`,
-    [originalKey]
-  );
+  const contentKey = `collapsible-header-${useId()}`;
+  const instanceZIndex = useInstanceZIndex();
   const { mount, unmount, update } = useCollapsibleHeaderConsumerContext();
 
-  const internalStyle = useMemo(() => {
-    return {
-      zIndex: 100000 - key - originalKey,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, originalKey]);
+  const internalStyle = useMemo(
+    () => ({ zIndex: 100000 - instanceZIndex }),
+    [instanceZIndex]
+  );
 
   const content = useMemo(() => {
     return (

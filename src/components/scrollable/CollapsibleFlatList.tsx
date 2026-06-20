@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   useCallback,
   useEffect,
@@ -6,18 +5,18 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { FlatListProps, View, StyleSheet, FlatList } from 'react-native';
+import { FlatListProps, StyleSheet } from 'react-native';
+import type { ScrollToIndexParams } from '../../types';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
+  useAnimatedStyle,
 } from 'react-native-reanimated';
 import useAnimatedScroll from './useAnimatedScroll';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 import type { CollapsibleProps } from '../../types';
 import AnimatedTopView from '../header/AnimatedTopView';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
-
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 type Props<Data> = Omit<FlatListProps<Data>, 'scrollEnabled'> &
   CollapsibleProps;
@@ -30,10 +29,6 @@ export default function CollapsibleFlatList<Data>({
   const { contentMinHeight, scrollViewRef, fixedHeaderHeight } =
     useInternalCollapsibleContext();
   const mounted = useRef(true);
-  const contentHeight = useRef(0);
-  const [internalContentMinHeight, setInternalContentMinHeight] = useState(
-    contentMinHeight.value
-  );
   const [internalProgressViewOffset, setInternalProgressViewOffset] =
     useState(0);
 
@@ -48,10 +43,12 @@ export default function CollapsibleFlatList<Data>({
       offset: yValue,
       animated,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const scrollToIndex = useCallback((params) => {
+  const scrollToIndex = useCallback((params: ScrollToIndexParams) => {
     scrollViewRef.current?.scrollToIndex?.(params);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const scrollToLocation = useCallback(() => {
@@ -65,33 +62,11 @@ export default function CollapsibleFlatList<Data>({
     scrollToLocation,
   });
 
-  const handleInternalContentHeight = useCallback((value: number) => {
-    if (mounted.current) {
-      setInternalContentMinHeight(value);
-    }
-  }, []);
-
   const handleInternalProgressViewOffset = useCallback((value: number) => {
     if (mounted.current) {
       setInternalProgressViewOffset(value);
     }
   }, []);
-
-  useAnimatedReaction(
-    () => {
-      return contentMinHeight.value;
-    },
-    (result, previous) => {
-      if (result !== previous) {
-        if (
-          contentHeight.current < result &&
-          internalContentMinHeight !== result
-        ) {
-          runOnJS(handleInternalContentHeight)(result);
-        }
-      }
-    }
-  );
 
   useAnimatedReaction(
     () => {
@@ -104,32 +79,39 @@ export default function CollapsibleFlatList<Data>({
     }
   );
 
-  const contentContainerStyle = useMemo(
-    () => [
-      styles.contentContainer,
-      { minHeight: internalContentMinHeight },
-      props.contentContainerStyle,
-    ],
-    [props.contentContainerStyle, internalContentMinHeight]
+  // Animate minHeight on the UI thread instead of bouncing through React state.
+  // Skip applying minHeight when the value is 0 to avoid forcing a 0-height
+  // layout on the first frame before the container has been measured.
+  const listHeaderStyle = useAnimatedStyle(
+    () => ({
+      minHeight:
+        contentMinHeight.value > 0 ? contentMinHeight.value : undefined,
+    }),
+    []
   );
 
-  const handleContentSizeChange = useCallback((_, height) => {
-    contentHeight.current = height;
-  }, []);
+  const contentContainerStyle = useMemo(
+    () => [styles.contentContainer, props.contentContainerStyle],
+    [props.contentContainerStyle]
+  );
 
   const handleScrollToIndexFailed = useCallback(() => {}, []);
 
+  const ListHeaderComponent = props.ListHeaderComponent;
   function renderListHeader() {
     return (
-      <View>
+      <Animated.View style={listHeaderStyle}>
         <AnimatedTopView height={headerHeight} />
-        {props.ListHeaderComponent}
-      </View>
+        {ListHeaderComponent &&
+          (React.isValidElement(ListHeaderComponent)
+            ? ListHeaderComponent
+            : React.createElement(ListHeaderComponent as React.ComponentType))}
+      </Animated.View>
     );
   }
 
   return (
-    <AnimatedFlatList
+    <Animated.FlatList
       ref={scrollViewRef}
       keyboardDismissMode="on-drag"
       keyboardShouldPersistTaps="handled"
@@ -140,7 +122,6 @@ export default function CollapsibleFlatList<Data>({
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
       ListHeaderComponent={renderListHeader()}
-      onContentSizeChange={handleContentSizeChange}
       //@ts-ignore
       simultaneousHandlers={[]}
       progressViewOffset={internalProgressViewOffset}

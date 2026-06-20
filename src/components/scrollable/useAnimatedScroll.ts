@@ -1,12 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { Dimensions, SectionListScrollParams } from 'react-native';
 import {
   runOnJS,
   useAnimatedScrollHandler,
   useSharedValue,
 } from 'react-native-reanimated';
-import type { ScrollToIndexParams } from '../../types';
+import type { CollapsibleHandles, ScrollToIndexParams } from '../../types';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
 
@@ -30,37 +29,52 @@ export default function useAnimatedScroll({
   const { setCollapsibleHandlers, fixedHeaderHeight } =
     useInternalCollapsibleContext();
 
+  // Keep a ref to the latest handlers so we can publish stable function
+  // references to setCollapsibleHandlers() that always delegate to the most
+  // recent closures. This avoids re-running the publish effect on every
+  // scrollable re-render.
+  const handlersRef = useRef<{
+    scrollTo: (y: number, animated?: boolean) => void;
+    scrollToIndex: (p: ScrollToIndexParams) => void;
+    scrollToLocation: (p: SectionListScrollParams) => void;
+  }>({ scrollTo, scrollToIndex, scrollToLocation });
+  handlersRef.current = { scrollTo, scrollToIndex, scrollToLocation };
+
   useEffect(() => {
     if (scrollY.value > 0) {
-      requestAnimationFrame(() => scrollTo(scrollY.value, false));
+      requestAnimationFrame(() =>
+        handlersRef.current.scrollTo(scrollY.value, false)
+      );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const collapse = useCallback(
     (animated = true) => {
-      scrollTo(fixedHeaderHeight.value, animated);
+      handlersRef.current.scrollTo(fixedHeaderHeight.value, animated);
     },
-    [scrollTo]
+    [fixedHeaderHeight]
   );
 
-  const expand = useCallback(() => scrollTo(0), [scrollTo]);
+  const expand = useCallback(() => handlersRef.current.scrollTo(0), []);
+
+  // Stable trampoline for use inside worklets: runOnJS captures the function
+  // reference at worklet-build time, so we must pass a stable function that
+  // dereferences handlersRef.current at JS-thread call time.
+  const scrollToOnJS = useCallback((y: number) => {
+    handlersRef.current.scrollTo(y);
+  }, []);
 
   useEffect(() => {
-    setCollapsibleHandlers({
+    const handlers: CollapsibleHandles = {
       collapse,
       expand,
-      scrollTo,
-      scrollToIndex,
-      scrollToLocation,
-    });
-  }, [
-    setCollapsibleHandlers,
-    collapse,
-    expand,
-    scrollTo,
-    scrollToIndex,
-    scrollToLocation,
-  ]);
+      scrollTo: (y, a) => handlersRef.current.scrollTo(y, a),
+      scrollToIndex: (p) => handlersRef.current.scrollToIndex(p),
+      scrollToLocation: (p) => handlersRef.current.scrollToLocation(p),
+    };
+    setCollapsibleHandlers(handlers);
+  }, [setCollapsibleHandlers, collapse, expand]);
 
   const scrollHandler = useAnimatedScrollHandler(
     {
@@ -81,12 +95,12 @@ export default function useAnimatedScroll({
             if (scrollDirection.value === 'up') {
               yValue = maxY;
             }
-            runOnJS(scrollTo)(yValue);
+            runOnJS(scrollToOnJS)(yValue);
           }
         }
       },
     },
-    [scrollTo]
+    [headerSnappable, fixedHeaderHeight, scrollY, scrollToOnJS]
   );
 
   return {

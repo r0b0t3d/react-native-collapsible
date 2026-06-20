@@ -1,6 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react-hooks/rules-of-hooks */
-import React, { ReactNode, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+} from 'react';
 import {
   LayoutChangeEvent,
   Pressable,
@@ -19,16 +24,17 @@ import Animated, {
   interpolate,
   useAnimatedReaction,
   runOnJS,
+  SharedValue,
 } from 'react-native-reanimated';
 
 export type CollapsibleHeaderProps = {
   onToggle: () => void;
-  collapsed: Animated.SharedValue<number>;
+  collapsed: SharedValue<number>;
 };
 
 type Props = {
   initialState?: 'collapsed' | 'expanded';
-  collapseState?: Animated.SharedValue<number>;
+  collapseState?: SharedValue<number>;
   renderHeader: (props: CollapsibleHeaderProps) => ReactNode;
   children: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
@@ -38,10 +44,9 @@ type Props = {
   onToggle?: (isExpand: boolean) => void;
 };
 
-let key = 0;
 export default function CollapsibleView({
   initialState = 'collapsed',
-  collapseState = useSharedValue(0),
+  collapseState: collapseStateProp,
   renderHeader,
   children,
   containerStyle,
@@ -49,16 +54,32 @@ export default function CollapsibleView({
   expandedBackgroundColor,
   onToggle,
 }: Props) {
+  // Shared value is always allocated; unused when caller provides one.
+  // The allocation cost is negligible and this keeps hook order stable
+  // across renders and React StrictMode double-invocation.
+  const collapseStateInternal = useSharedValue(0);
+  const collapseState = collapseStateProp ?? collapseStateInternal;
   const actualHeight = useSharedValue(11110);
-  const contentKey = useMemo(() => `collapsible-view-${key++}`, []);
+  const instanceId = useId();
+  const contentKey = useMemo(
+    () => `collapsible-view-${instanceId}`,
+    [instanceId]
+  );
 
   useEffect(() => {
+    // `initialState` is only honored when the caller does not pass a
+    // `collapseState` of their own. When a caller-controlled SV is
+    // provided, mutating it from here would silently clobber whatever
+    // value the caller is driving from gesture state or animations.
+    if (collapseStateProp) {
+      return;
+    }
     const newValue = initialState === 'collapsed' ? 0 : 1;
     if (newValue === collapseState.value) {
       return;
     }
     collapseState.value = newValue;
-  }, [initialState]);
+  }, [initialState, collapseStateProp]);
 
   const handleToggle = useCallback(() => {
     collapseState.value = withSpring(collapseState.value === 0 ? 1 : 0, {
@@ -80,7 +101,7 @@ export default function CollapsibleView({
         overshootClamping: true,
       }),
     }),
-    [actualHeight, contentKey]
+    [actualHeight, contentKey, collapseState]
   );
 
   const contentHeight = useAnimatedStyle(
@@ -114,7 +135,7 @@ export default function CollapsibleView({
       };
     }
     return {};
-  }, []);
+  }, [collapseState, collapsedBackgroundColor, expandedBackgroundColor]);
 
   const headerProps = useMemo(
     () => ({ onToggle: handleToggle, collapsed: collapseState }),

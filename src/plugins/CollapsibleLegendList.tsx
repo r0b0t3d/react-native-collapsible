@@ -13,6 +13,7 @@ import type { CollapsibleProps } from '../types';
 import AnimatedTopView from '../components/header/AnimatedTopView';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
 import { AnimatedLegendList } from '@legendapp/list/reanimated';
+import type { ScrollToIndexParams } from '../types';
 
 type Props<Data> = FlatListProps<Data> & CollapsibleProps;
 
@@ -38,7 +39,7 @@ export default function CollapsibleLegendList<Data>({
     });
   }, []);
 
-  const scrollToIndex = useCallback((params) => {
+  const scrollToIndex = useCallback((params: ScrollToIndexParams) => {
     scrollViewRef.current?.scrollToIndex?.(params);
   }, []);
 
@@ -72,11 +73,15 @@ export default function CollapsibleLegendList<Data>({
 
   const handleScrollToIndexFailed = useCallback(() => {}, []);
 
+  const ListHeaderComponent = props.ListHeaderComponent;
   function renderListHeader() {
     return (
       <View>
         <AnimatedTopView height={headerHeight} />
-        {props.ListHeaderComponent}
+        {ListHeaderComponent &&
+          (typeof ListHeaderComponent === 'function'
+            ? React.createElement(ListHeaderComponent)
+            : ListHeaderComponent)}
       </View>
     );
   }
@@ -101,6 +106,7 @@ export default function CollapsibleLegendList<Data>({
         ListHeaderComponent={renderListHeader()}
         //@ts-ignore
         simultaneousHandlers={[]}
+        // @ts-ignore
         animatedProps={animatedProps}
       />
     </View>

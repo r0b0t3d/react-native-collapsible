@@ -1,18 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedReaction,
-} from 'react-native-reanimated';
+import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
 import useAnimatedScroll from '../components/scrollable/useAnimatedScroll';
 import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
 import type { CollapsibleProps } from '../types';
 import AnimatedTopView from '../components/header/AnimatedTopView';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import { FlashList, FlashListProps } from '@shopify/flash-list';
-
-const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
+import { AnimatedFlashList, FlashListProps } from '@shopify/flash-list';
+import type { ScrollToIndexParams } from '../types';
 
 type Props<Data> = FlashListProps<Data> & CollapsibleProps;
 
@@ -39,7 +35,7 @@ export default function CollapsibleFlashList<Data>({
     });
   }, []);
 
-  const scrollToIndex = useCallback((params) => {
+  const scrollToIndex = useCallback((params: ScrollToIndexParams) => {
     scrollViewRef.current?.scrollToIndex?.(params);
   }, []);
 
@@ -73,11 +69,15 @@ export default function CollapsibleFlashList<Data>({
 
   const handleScrollToIndexFailed = useCallback(() => {}, []);
 
+  const ListHeaderComponent = props.ListHeaderComponent;
   function renderListHeader() {
     return (
       <View>
         <AnimatedTopView height={headerHeight} />
-        {props.ListHeaderComponent}
+        {ListHeaderComponent &&
+          (typeof ListHeaderComponent === 'function'
+            ? React.createElement(ListHeaderComponent)
+            : ListHeaderComponent)}
       </View>
     );
   }

@@ -11,8 +11,8 @@ export default function Top100Tab() {
   const { scrollToView } = useCollapsibleContext();
   const data = useMemo(() => [...Array(20).keys()].map((id) => ({ id })), []);
   const [isLoading, setLoading] = React.useState(true);
-  const sticky1 = useRef<View>();
-  const sticky2 = useRef<View>();
+  const sticky1 = useRef<View>(null);
+  const sticky2 = useRef<View>(null);
 
   const handleRefresh = useCallback(() => {
     setLoading(true);

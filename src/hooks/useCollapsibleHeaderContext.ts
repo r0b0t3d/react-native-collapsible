@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
 import { LayoutRectangle } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { SharedValue } from 'react-native-reanimated';
 
 export type CollapsibleContextHeaderType = {
   handleStickyViewLayout: (key: string, layout?: LayoutRectangle) => void;
-  animatedY: Animated.SharedValue<number>;
+  animatedY: SharedValue<number>;
 };
 
 export const CollapsibleHeaderContext =
