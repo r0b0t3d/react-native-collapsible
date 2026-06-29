@@ -1,14 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { runOnJS, useAnimatedReaction } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+} from 'react-native-reanimated';
 import useAnimatedScroll from '../components/scrollable/useAnimatedScroll';
 import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
 import type { CollapsibleProps } from '../types';
 import AnimatedTopView from '../components/header/AnimatedTopView';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import { AnimatedFlashList, FlashListProps } from '@shopify/flash-list';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
 import type { ScrollToIndexParams } from '../types';
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 type Props<Data> = FlashListProps<Data> & CollapsibleProps;
 
