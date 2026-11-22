@@ -1,5 +1,7 @@
 import { Ref, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   SectionListScrollParams,
   StyleProp,
   StyleSheet,
@@ -27,6 +29,8 @@ type ScrollableProps = CollapsibleProps & {
   ref?: Ref<any>;
   style?: StyleProp<ViewStyle>;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  onContentSizeChange?: (width: number, height: number) => void;
+  onScrollBeginDrag?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 };
 
 type ScrollableLayout = {
@@ -48,8 +52,12 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
   { headerSnappable = true, ref: userRef, ...props }: P
 ) {
   const { scrollY, headerHeight } = useCollapsibleContext();
-  const { registerScrollable, collapsibleDistance, contentMinHeight } =
-    useInternalCollapsibleContext();
+  const {
+    registerScrollable,
+    collapsibleDistance,
+    contentMinHeight,
+    containerHeight,
+  } = useInternalCollapsibleContext();
   const node = useRef<any>(null);
   const [layout, setLayout] = useState<ScrollableLayout>({
     progressViewOffset: 0,
@@ -83,14 +91,35 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
     [userRef]
   );
 
+  const restore = useRef({ target: 0, contentHeight: 0 });
+
+  const scrollToOffset = useCallback(
+    (offset: number, animated = true) => {
+      if (adapter.scrollTo) {
+        adapter.scrollTo(node.current, offset, animated);
+      } else {
+        console.warn(`${adapter.name} does not support scrollTo`);
+      }
+    },
+    [adapter]
+  );
+
+  const applyRestore = useCallback(() => {
+    const { target, contentHeight } = restore.current;
+    if (target <= 0 || contentHeight === 0) {
+      return;
+    }
+    const maxOffset = Math.max(0, contentHeight - containerHeight.value);
+    scrollToOffset(Math.min(target, maxOffset), false);
+    if (maxOffset >= target) {
+      restore.current.target = 0;
+    }
+  }, [containerHeight, scrollToOffset]);
+
   useEffect(() => {
     const unsupported = (method: string) => () =>
       console.warn(`${adapter.name} does not support ${method}`);
-    const { scrollTo, scrollToIndex, scrollToLocation } = adapter;
-    const scrollToOffset = scrollTo
-      ? (offset: number, animated = true) =>
-          scrollTo(node.current, offset, animated)
-      : unsupported('scrollTo');
+    const { scrollToIndex, scrollToLocation } = adapter;
 
     const unregister = registerScrollable({
       collapse: (animated = true) =>
@@ -104,11 +133,36 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
         ? (params) => scrollToLocation(node.current, params)
         : unsupported('scrollToLocation'),
     });
-    if (scrollY.value > 0) {
-      requestAnimationFrame(() => scrollToOffset(scrollY.value, false));
-    }
+    restore.current.target = scrollY.value;
+    applyRestore();
     return unregister;
-  }, [adapter, registerScrollable, collapsibleDistance, scrollY]);
+  }, [
+    adapter,
+    registerScrollable,
+    collapsibleDistance,
+    scrollY,
+    scrollToOffset,
+    applyRestore,
+  ]);
+
+  const { onContentSizeChange, onScrollBeginDrag } = props;
+
+  const handleContentSizeChange = useCallback(
+    (width: number, height: number) => {
+      onContentSizeChange?.(width, height);
+      restore.current.contentHeight = height;
+      applyRestore();
+    },
+    [onContentSizeChange, applyRestore]
+  );
+
+  const handleScrollBeginDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      onScrollBeginDrag?.(event);
+      restore.current.target = 0;
+    },
+    [onScrollBeginDrag]
+  );
 
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollY.value = event.contentOffset.y;
@@ -140,6 +194,8 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
       props.contentContainerStyle,
     ],
     onScroll,
+    onContentSizeChange: handleContentSizeChange,
+    onScrollBeginDrag: handleScrollBeginDrag,
     progressViewOffset: layout.progressViewOffset,
   };
 }
