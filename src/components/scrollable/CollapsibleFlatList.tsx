@@ -5,12 +5,11 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { FlatListProps, StyleSheet } from 'react-native';
+import { FlatListProps, StyleSheet, View } from 'react-native';
 import type { ScrollToIndexParams } from '../../types';
 import Animated, {
   runOnJS,
   useAnimatedReaction,
-  useAnimatedStyle,
 } from 'react-native-reanimated';
 import useAnimatedScroll from './useAnimatedScroll';
 import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
@@ -79,20 +78,32 @@ export default function CollapsibleFlatList<Data>({
     }
   );
 
-  // Animate minHeight on the UI thread instead of bouncing through React state.
-  // Skip applying minHeight when the value is 0 to avoid forcing a 0-height
-  // layout on the first frame before the container has been measured.
-  const listHeaderStyle = useAnimatedStyle(
-    () => ({
-      minHeight:
-        contentMinHeight.value > 0 ? contentMinHeight.value : undefined,
-    }),
-    []
+  const [internalContentMinHeight, setInternalContentMinHeight] = useState<
+    number | undefined
+  >(undefined);
+
+  const handleInternalContentMinHeight = useCallback((value: number) => {
+    if (mounted.current) {
+      setInternalContentMinHeight(value > 0 ? value : undefined);
+    }
+  }, []);
+
+  useAnimatedReaction(
+    () => contentMinHeight.value,
+    (result, previous) => {
+      if (result !== previous) {
+        runOnJS(handleInternalContentMinHeight)(result);
+      }
+    }
   );
 
   const contentContainerStyle = useMemo(
-    () => [styles.contentContainer, props.contentContainerStyle],
-    [props.contentContainerStyle]
+    () => [
+      styles.contentContainer,
+      { minHeight: internalContentMinHeight },
+      props.contentContainerStyle,
+    ],
+    [props.contentContainerStyle, internalContentMinHeight]
   );
 
   const handleScrollToIndexFailed = useCallback(() => {}, []);
@@ -100,13 +111,13 @@ export default function CollapsibleFlatList<Data>({
   const ListHeaderComponent = props.ListHeaderComponent;
   function renderListHeader() {
     return (
-      <Animated.View style={listHeaderStyle}>
+      <View>
         <AnimatedTopView height={headerHeight} />
         {ListHeaderComponent &&
           (React.isValidElement(ListHeaderComponent)
             ? ListHeaderComponent
             : React.createElement(ListHeaderComponent as React.ComponentType))}
-      </Animated.View>
+      </View>
     );
   }
 
