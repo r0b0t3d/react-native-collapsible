@@ -1,5 +1,5 @@
 import type React from 'react';
-import type { LayoutRectangle, SectionListScrollParams } from 'react-native';
+import type { SectionListScrollParams } from 'react-native';
 import type { SharedValue } from 'react-native-reanimated';
 
 export type ScrollToIndexParams = {
@@ -46,6 +46,12 @@ export type LayoutParams = {
   height: number;
 };
 
+export type HeaderLayout = {
+  y: number;
+  height: number;
+  stickyHeight: number;
+};
+
 export type CollapsibleContextInternalType = {
   scrollViewRef: React.RefObject<any>;
   containerRef: React.RefObject<any>;
@@ -57,11 +63,7 @@ export type CollapsibleContextInternalType = {
   fixedHeaderHeight: SharedValue<number>;
   collapsibleDistance: SharedValue<number>;
   headerHeight: SharedValue<number>;
-  handleHeaderContainerLayout: (
-    key: string,
-    layout?: LayoutRectangle,
-    stickyHeight?: number
-  ) => void;
+  headerLayouts: SharedValue<Record<string, HeaderLayout>>;
   setCollapsibleHandlers: (handlers: CollapsibleHandles) => void;
 };
 

@@ -11,7 +11,6 @@ import useCollapsibleContext from '../../hooks/useCollapsibleContext';
 import Animated, {
   Extrapolate,
   interpolate,
-  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
@@ -34,7 +33,7 @@ export default function CollapsibleHeaderContainerProvider({
   containerStyle,
   contentKey,
 }: Props) {
-  const { handleHeaderContainerLayout, headerViewPositions } =
+  const { headerLayouts, headerViewPositions } =
     useInternalCollapsibleContext();
   const { scrollY } = useCollapsibleContext();
   const currentLayout = useSharedValue<LayoutRectangle | undefined>(undefined);
@@ -44,10 +43,11 @@ export default function CollapsibleHeaderContainerProvider({
 
   useEffect(() => {
     return () => {
-      handleHeaderContainerLayout(contentKey);
+      const layouts = { ...headerLayouts.value };
+      delete layouts[contentKey];
+      headerLayouts.value = layouts;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentKey]);
+  }, [contentKey, headerLayouts]);
 
   const stickyHeight = useDerivedValue(
     () =>
@@ -59,23 +59,26 @@ export default function CollapsibleHeaderContainerProvider({
   );
 
   useAnimatedReaction(
-    () => {
-      if (!currentLayout.value) {
-        return -1;
+    () =>
+      currentLayout.value
+        ? {
+            y: currentLayout.value.y,
+            height: currentLayout.value.height,
+            stickyHeight: stickyHeight.value,
+          }
+        : undefined,
+    (layout, previous) => {
+      if (
+        layout &&
+        (!previous ||
+          layout.y !== previous.y ||
+          layout.height !== previous.height ||
+          layout.stickyHeight !== previous.stickyHeight)
+      ) {
+        headerLayouts.value = { ...headerLayouts.value, [contentKey]: layout };
       }
-      return (
-        currentLayout.value.height - currentLayout.value.y - stickyHeight.value
-      );
     },
-    (result, previous) => {
-      if (result !== -1 && result !== previous) {
-        runOnJS(handleHeaderContainerLayout)(
-          contentKey,
-          currentLayout.value,
-          stickyHeight.value
-        );
-      }
-    }
+    [contentKey]
   );
 
   const handleLayout = useCallback(

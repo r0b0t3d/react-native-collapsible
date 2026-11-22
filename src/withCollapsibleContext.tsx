@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useCallback, useMemo, useRef, FC } from 'react';
-import type { CollapsibleHandles } from './types';
+import type { CollapsibleHandles, HeaderLayout } from './types';
 import { CollapsibleContext } from './hooks/useCollapsibleContext';
 import { InternalCollapsibleContext } from './hooks/useInternalCollapsibleContext';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
-import type { LayoutRectangle, View } from 'react-native';
+import type { View } from 'react-native';
 
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
@@ -15,12 +15,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const containerHeight = useSharedValue(0);
     const scrollViewRef = useRef<View>(null);
     const containerRef = useRef<View>(null);
-    const headerContainerLayouts = useRef<
-      Record<string, (LayoutRectangle & { stickyHeight?: number }) | undefined>
-    >({});
-    const headerViewPositions = useSharedValue<
-      Record<string, { top: number; stickyHeight: number }>
-    >({});
+    const headerLayouts = useSharedValue<Record<string, HeaderLayout>>({});
 
     const setCollapsibleHandlers = useCallback(
       (handlers: CollapsibleHandles) => {
@@ -29,9 +24,24 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       []
     );
 
+    const headerViewPositions = useDerivedValue(() => {
+      const layouts = headerLayouts.value;
+      const positions: Record<string, { top: number; stickyHeight: number }> =
+        {};
+      let top = 0;
+      Object.keys(layouts)
+        .sort((a, b) => layouts[a]!.y - layouts[b]!.y)
+        .forEach((key) => {
+          const stickyHeight = layouts[key]!.stickyHeight;
+          positions[key] = { top, stickyHeight };
+          top += stickyHeight;
+        });
+      return positions;
+    }, []);
+
     const collapsibleDistance = useDerivedValue(() => {
-      const stickyHeight = Object.values(headerViewPositions.value).reduce(
-        (acc, position) => acc + position.stickyHeight,
+      const stickyHeight = Object.values(headerLayouts.value).reduce(
+        (acc, layout) => acc + layout.stickyHeight,
         0
       );
       return Math.max(0, fixedHeaderHeight.value - stickyHeight);
@@ -45,41 +55,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       return containerHeight.value + collapsibleDistance.value;
     }, []);
 
-    const handleHeaderContainerLayout = useCallback(
-      (key: string, layout?: LayoutRectangle, stickyHeight?: number) => {
-        headerContainerLayouts.current[key] = layout
-          ? {
-              ...layout,
-              stickyHeight,
-            }
-          : undefined;
-        const headerContainers = Object.keys(
-          headerContainerLayouts.current
-        ).filter((k: string) => !!headerContainerLayouts.current[k]);
-        // Calculate header positions
-        const sortedHeaders = headerContainers.sort((a, b) => {
-          return (
-            (headerContainerLayouts.current[a]?.y || 0) -
-            (headerContainerLayouts.current[b]?.y || 0)
-          );
-        });
-        const values: any = {};
-        let aStickyHeight = 0;
-        for (let index = 0; index < sortedHeaders.length; index++) {
-          const headerKey = sortedHeaders[index];
-          const sHeight =
-            headerContainerLayouts.current[headerKey]?.stickyHeight ?? 0;
-          values[headerKey] = {
-            top: aStickyHeight,
-            stickyHeight: sHeight,
-          };
-          aStickyHeight += sHeight;
-        }
-        headerViewPositions.value = values;
-      },
-      []
-    );
-
     const handleScrollToView = useCallback(
       (ref: React.RefObject<any>, animated?: boolean) => {
         if (!ref.current) {
@@ -88,20 +63,9 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         ref.current.measureLayout(
           containerRef.current,
           (_left: number, top: number, _width: number, _height: number) => {
-            const headerContainers = Object.keys(
-              headerContainerLayouts.current
-            ).filter((k: string) => {
-              const layout = headerContainerLayouts.current[k];
-              if (layout) {
-                return layout.y + layout.height < top;
-              }
-              return false;
-            });
-            const stickyHeightAbove = headerContainers.reduce((acc, key) => {
-              const layout = headerContainerLayouts.current[key];
-              acc += layout?.stickyHeight ?? 0;
-              return acc;
-            }, 0);
+            const stickyHeightAbove = Object.values(headerLayouts.value)
+              .filter((layout) => layout.y + layout.height < top)
+              .reduce((acc, layout) => acc + layout.stickyHeight, 0);
             collapsibleHandlers.current?.scrollTo(
               top - stickyHeightAbove,
               animated
@@ -136,7 +100,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         containerRef,
         containerHeight,
         scrollViewRef,
-        handleHeaderContainerLayout,
+        headerLayouts,
         setCollapsibleHandlers,
         headerHeight,
         fixedHeaderHeight,
@@ -146,7 +110,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       }),
       [
         setCollapsibleHandlers,
-        handleHeaderContainerLayout,
+        headerLayouts,
         headerHeight,
         fixedHeaderHeight,
         collapsibleDistance,
