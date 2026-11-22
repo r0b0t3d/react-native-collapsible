@@ -1,10 +1,4 @@
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   LayoutChangeEvent,
   Pressable,
@@ -60,12 +54,6 @@ export default function CollapsibleView({
   const collapseState = collapseStateProp ?? collapseStateInternal;
   const actualHeight = useSharedValue(0);
 
-  useEffect(() => {
-    if (!collapseStateProp) {
-      collapseStateInternal.value = initialValue(initialState);
-    }
-  }, [initialState, collapseStateProp, collapseStateInternal]);
-
   const handleToggle = useCallback(() => {
     collapseState.value = withSpring(collapseState.value === 0 ? 1 : 0, {
       overshootClamping: true,
@@ -92,8 +80,7 @@ export default function CollapsibleView({
       if (onToggle) {
         runOnJS(onToggle)(result === 1);
       }
-    },
-    [onToggle]
+    }
   );
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
@@ -107,7 +94,7 @@ export default function CollapsibleView({
       };
     }
     return {};
-  }, [collapseState, collapsedBackgroundColor, expandedBackgroundColor]);
+  });
 
   const headerProps = useMemo(
     () => ({ onToggle: handleToggle, collapsed: collapseState }),
@@ -166,7 +153,7 @@ export function CollapsibleHeaderText({
         },
       ],
     };
-  }, [iconInitialAngle]);
+  });
 
   const [expanded, setExpanded] = useState(false);
   useAnimatedReaction(
@@ -186,7 +173,7 @@ export function CollapsibleHeaderText({
           accessibilityRole="button"
           accessibilityState={{ expanded }}
         >
-          <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
+          <Text style={titleStyle}>{title}</Text>
         </Pressable>
         {icon && (
           <Pressable onPress={onToggle} accessible={false}>
@@ -213,8 +200,5 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  headerTitle: {
-    // flex: 1,
   },
 });

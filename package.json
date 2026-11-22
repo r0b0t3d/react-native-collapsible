@@ -117,13 +117,7 @@
     "node": ">= 16.0.0"
   },
   "jest": {
-    "preset": "react-native",
-    "setupFiles": [
-      "<rootDir>/jest.setup.js"
-    ],
-    "moduleNameMapper": {
-      "^react-native-reanimated$": "<rootDir>/jest.setup.js"
-    },
+    "testEnvironment": "node",
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"

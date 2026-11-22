@@ -1,40 +1,35 @@
 import React from 'react';
-import { View, StyleSheet, FlatListProps } from 'react-native';
+import { FlatListProps, View } from 'react-native';
 import { AnimatedLegendList } from '@legendapp/list/reanimated';
 import type { CollapsibleProps } from '../types';
 import useCollapsibleScrollable, {
-  ScrollableMethods,
-  unsupported,
-} from '../components/scrollable/useCollapsibleScrollable';
-import CollapsibleListHeader from '../components/scrollable/CollapsibleListHeader';
+  ScrollableAdapter,
+} from '../scrollable/useCollapsibleScrollable';
+import { renderListHeader } from '../scrollable/HeaderSpacer';
 
 type Props<Data> = FlatListProps<Data> & CollapsibleProps;
 
-const methods: ScrollableMethods = {
-  scrollTo: (list, offset, animated = true) =>
+const adapter: ScrollableAdapter = {
+  name: 'CollapsibleLegendList',
+  scrollTo: (list, offset, animated) =>
     list?.scrollToOffset({ offset, animated }),
   scrollToIndex: (list, params) => list?.scrollToIndex(params),
-  scrollToLocation: unsupported('CollapsibleLegendList', 'scrollToLocation'),
 };
 
-export default function CollapsibleLegendList<Data>({
-  headerSnappable = true,
-  ...props
-}: Props<Data>) {
-  const { scrollableProps, scrollHandler, progressViewOffset } =
-    useCollapsibleScrollable(methods, headerSnappable);
+export default function CollapsibleLegendList<Data>(props: Props<Data>) {
+  const { style, ...scrollableProps } = useCollapsibleScrollable(
+    adapter,
+    props
+  );
 
   return (
-    <View style={[StyleSheet.absoluteFill, props.style]}>
-      {/* @ts-ignore */}
+    <View style={style}>
+      {/* @ts-expect-error animated list types drop the generic item type */}
       <AnimatedLegendList
         {...scrollableProps}
-        {...props}
-        onScroll={scrollHandler}
-        ListHeaderComponent={
-          <CollapsibleListHeader component={props.ListHeaderComponent} />
-        }
-        progressViewOffset={progressViewOffset}
+        style={props.style}
+        contentContainerStyle={props.contentContainerStyle}
+        ListHeaderComponent={renderListHeader(props.ListHeaderComponent)}
       />
     </View>
   );

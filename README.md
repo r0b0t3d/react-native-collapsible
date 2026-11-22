@@ -118,6 +118,8 @@ Note: Feel free to add your showcase here by a PR
 - `CollapsibleHeaderContainer` renders in place. It must be a direct child of `CollapsibleContainer`. Fragments are fine, but do not wrap it in a `View`.
 - `headerHeight` is read-only. It is derived from the header layouts.
 - Header snapping uses native `snapToOffsets`. A `snapToOffsets` prop that you pass replaces header snapping.
+- `CollapsibleView` reads `initialState` only on mount. Use `collapseState` to control it after mount.
+- Scrollables log a warning when you call a scroll method they do not support, for example `scrollToIndex` on `CollapsibleScrollView`.
 - Removed
   - `useDynamicLayout` prop of `CollapsibleView`. The content height is always tracked.
   - `react-native-gesture-handler` peer dependency.
