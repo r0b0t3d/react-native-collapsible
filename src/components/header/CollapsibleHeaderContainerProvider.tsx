@@ -43,9 +43,12 @@ export default function CollapsibleHeaderContainerProvider({
 
   useEffect(() => {
     return () => {
-      const layouts = { ...headerLayouts.value };
-      delete layouts[contentKey];
-      headerLayouts.value = layouts;
+      headerLayouts.modify((layouts) => {
+        'worklet';
+        const rest = { ...layouts };
+        delete rest[contentKey];
+        return rest;
+      });
     };
   }, [contentKey, headerLayouts]);
 
