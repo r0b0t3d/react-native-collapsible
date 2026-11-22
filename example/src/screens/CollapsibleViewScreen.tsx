@@ -24,7 +24,6 @@ export default function CollapsibleViewScreen({}: Props) {
       <CollapsibleView
         renderHeader={renderHeader}
         containerStyle={styles.container}
-        useDynamicLayout
       >
         <View style={{ backgroundColor: 'cyan', padding: 20 }}>
           <Text>
@@ -43,7 +42,6 @@ export default function CollapsibleViewScreen({}: Props) {
       <CollapsibleView
         renderHeader={renderHeader}
         containerStyle={styles.container}
-        useDynamicLayout
       >
         <View style={{ backgroundColor: 'cyan', padding: 20 }}>
           <Text>

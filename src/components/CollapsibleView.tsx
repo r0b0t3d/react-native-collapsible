@@ -1,10 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import React, {
   ReactNode,
   useCallback,
   useEffect,
-  useId,
   useMemo,
+  useState,
 } from 'react';
 import {
   LayoutChangeEvent,
@@ -40,9 +39,12 @@ type Props = {
   containerStyle?: StyleProp<ViewStyle>;
   collapsedBackgroundColor?: string;
   expandedBackgroundColor?: string;
-  useDynamicLayout?: boolean;
   onToggle?: (isExpand: boolean) => void;
 };
+
+function initialValue(initialState: Props['initialState']) {
+  return initialState === 'expanded' ? 1 : 0;
+}
 
 export default function CollapsibleView({
   initialState = 'collapsed',
@@ -54,65 +56,40 @@ export default function CollapsibleView({
   expandedBackgroundColor,
   onToggle,
 }: Props) {
-  // Shared value is always allocated; unused when caller provides one.
-  // The allocation cost is negligible and this keeps hook order stable
-  // across renders and React StrictMode double-invocation.
-  const collapseStateInternal = useSharedValue(0);
+  const collapseStateInternal = useSharedValue(initialValue(initialState));
   const collapseState = collapseStateProp ?? collapseStateInternal;
-  const actualHeight = useSharedValue(11110);
-  const instanceId = useId();
-  const contentKey = useMemo(
-    () => `collapsible-view-${instanceId}`,
-    [instanceId]
-  );
+  const actualHeight = useSharedValue(0);
 
   useEffect(() => {
-    // `initialState` is only honored when the caller does not pass a
-    // `collapseState` of their own. When a caller-controlled SV is
-    // provided, mutating it from here would silently clobber whatever
-    // value the caller is driving from gesture state or animations.
-    if (collapseStateProp) {
-      return;
+    if (!collapseStateProp) {
+      collapseStateInternal.value = initialValue(initialState);
     }
-    const newValue = initialState === 'collapsed' ? 0 : 1;
-    if (newValue === collapseState.value) {
-      return;
-    }
-    collapseState.value = newValue;
-  }, [initialState, collapseStateProp]);
+  }, [initialState, collapseStateProp, collapseStateInternal]);
 
   const handleToggle = useCallback(() => {
     collapseState.value = withSpring(collapseState.value === 0 ? 1 : 0, {
       overshootClamping: true,
     });
-  }, []);
+  }, [collapseState]);
 
-  const handleLayout = useCallback((event: LayoutChangeEvent) => {
-    if (event.nativeEvent.layout.height >= 0) {
+  const handleLayout = useCallback(
+    (event: LayoutChangeEvent) => {
       actualHeight.value = event.nativeEvent.layout.height;
+    },
+    [actualHeight]
+  );
+
+  const wrapperStyle = useAnimatedStyle(() => {
+    if (actualHeight.value === 0) {
+      return collapseState.value === 0 ? { height: 0 } : {};
     }
-  }, []);
-
-  const wrapperStyle = useAnimatedStyle(
-    () => ({
-      height: withSpring(collapseState.value === 1 ? actualHeight.value : 0, {
-        damping: 5,
-        stiffness: 130,
-        overshootClamping: true,
-      }),
-    }),
-    [actualHeight, contentKey, collapseState]
-  );
-
-  const contentHeight = useAnimatedStyle(
-    () => ({
-      height: actualHeight.value > 0 ? actualHeight.value : undefined,
-    }),
-    [actualHeight, contentKey]
-  );
+    return {
+      height: interpolate(collapseState.value, [0, 1], [0, actualHeight.value]),
+    };
+  }, [actualHeight, collapseState]);
 
   useAnimatedReaction(
-    () => (collapseState.value === 0 ? 0 : collapseState.value === 1 ? 1 : 0),
+    () => (collapseState.value === 1 ? 1 : 0),
     (result, prev) => {
       if (prev === null || result === prev) {
         return;
@@ -120,10 +97,10 @@ export default function CollapsibleView({
       if (onToggle) {
         runOnJS(onToggle)(result === 1);
       }
-    }
+    },
+    [onToggle]
   );
 
-  // @ts-ignore
   const containerAnimatedStyle = useAnimatedStyle(() => {
     if (collapsedBackgroundColor && expandedBackgroundColor) {
       return {
@@ -152,18 +129,9 @@ export default function CollapsibleView({
         style={[styles.wrapper, wrapperStyle]}
         pointerEvents="box-none"
       >
-        <Animated.View
-          style={[styles.content, contentHeight]}
-          pointerEvents="box-none"
-        >
-          <View
-            key={contentKey}
-            onLayout={handleLayout}
-            pointerEvents="box-none"
-          >
-            {children}
-          </View>
-        </Animated.View>
+        <View onLayout={handleLayout} pointerEvents="box-none">
+          {children}
+        </View>
       </Animated.View>
     </Animated.View>
   );
@@ -201,14 +169,28 @@ export function CollapsibleHeaderText({
     };
   }, [iconInitialAngle]);
 
+  const [expanded, setExpanded] = useState(false);
+  useAnimatedReaction(
+    () => collapsed.value >= 0.5,
+    (result, prev) => {
+      if (result !== prev) {
+        runOnJS(setExpanded)(result);
+      }
+    }
+  );
+
   return (
     <View style={style} pointerEvents="box-none">
       <View style={styles.headerContainer} pointerEvents="box-none">
-        <Pressable onPress={onToggle}>
+        <Pressable
+          onPress={onToggle}
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+        >
           <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
         </Pressable>
         {icon && (
-          <Pressable onPress={onToggle}>
+          <Pressable onPress={onToggle} accessible={false}>
             <Animated.View style={iconStyle}>{icon}</Animated.View>
           </Pressable>
         )}
@@ -222,7 +204,6 @@ const styles = StyleSheet.create({
   wrapper: {
     overflow: 'hidden',
   },
-  content: {},
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
