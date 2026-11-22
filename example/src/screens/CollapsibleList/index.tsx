@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import {
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -18,9 +19,18 @@ import {
 import Top100Tab from './components/Top100Tab';
 import AlbumsTab from './components/AlbumsTab';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Pressable as GesturePressable,
+  RectButton,
+} from 'react-native-gesture-handler';
+
+const FILTERS = Array.from({ length: 10 }, (_, index) => `Filter ${index + 1}`);
 
 function CollapsibleList() {
   const [currentTab, setCurrentTab] = useState(0);
+  const [selectedFilter, setSelectedFilter] = useState(FILTERS[0]);
+  const [followCount, setFollowCount] = useState(0);
+  const [shareCount, setShareCount] = useState(0);
   const { top } = useSafeAreaInsets();
   const textInput = useRef(null);
 
@@ -46,6 +56,20 @@ function CollapsibleList() {
               pointerEvents="none"
             />
             <Text style={styles.name}>Alan Walker</Text>
+            <View style={styles.actions}>
+              <RectButton
+                style={styles.action}
+                onPress={() => setFollowCount((count) => count + 1)}
+              >
+                <Text style={styles.actionTitle}>Follow {followCount}</Text>
+              </RectButton>
+              <GesturePressable
+                style={styles.action}
+                onPress={() => setShareCount((count) => count + 1)}
+              >
+                <Text style={styles.actionTitle}>Share {shareCount}</Text>
+              </GesturePressable>
+            </View>
           </View>
           <CollapsibleView renderHeader={renderHeder}>
             <View style={styles.collapsibleView} pointerEvents="box-none">
@@ -92,6 +116,33 @@ function CollapsibleList() {
                 </Text>
               </Pressable>
             </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filters}
+            >
+              {FILTERS.map((filter) => (
+                <Pressable
+                  key={filter}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: filter === selectedFilter }}
+                  style={[
+                    styles.filter,
+                    filter === selectedFilter && styles.filterSelected,
+                  ]}
+                  onPress={() => setSelectedFilter(filter)}
+                >
+                  <Text
+                    style={[
+                      styles.filterTitle,
+                      filter === selectedFilter && styles.filterTitleSelected,
+                    ]}
+                  >
+                    {filter}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
           </StickyView>
         </CollapsibleHeaderContainer>
         {currentTab === 0 && <Top100Tab />}
@@ -121,7 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#713D7C',
   },
   infoContainer: {
-    height: 200,
+    height: 250,
     paddingTop: 60,
     alignItems: 'center',
     justifyContent: 'center',
@@ -150,6 +201,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 10,
+  },
+  action: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: '#7339B3',
+  },
+  actionTitle: {
+    fontWeight: 'bold',
+    color: 'white',
+  },
   tabsContainer: {
     flexDirection: 'row',
     marginHorizontal: 20,
@@ -173,6 +239,27 @@ const styles = StyleSheet.create({
   },
   tabTitleSelected: {
     color: '#7339B3',
+  },
+  filters: {
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    gap: 8,
+  },
+  filter: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#EFE7F5',
+  },
+  filterSelected: {
+    backgroundColor: '#7339B3',
+  },
+  filterTitle: {
+    fontWeight: 'bold',
+    color: '#7339B3',
+  },
+  filterTitleSelected: {
+    color: 'white',
   },
   collapsibleView: {
     height: 500,

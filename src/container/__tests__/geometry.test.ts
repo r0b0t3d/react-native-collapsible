@@ -3,6 +3,7 @@ import {
   headerHeightOf,
   HeaderLayouts,
   headerScroll,
+  snapOffsetFor,
   headerTranslate,
   stackPosition,
   stickyHeightAbove,
@@ -62,5 +63,30 @@ describe('header motion', () => {
   it('pins a sticky view once the scroll passes its position', () => {
     expect(stickyTranslate(100, 250)).toBe(0);
     expect(stickyTranslate(260, 250)).toBe(10);
+  });
+});
+
+describe('header snapping', () => {
+  const offsets = [0, 330];
+
+  it('snaps to the offset in the scroll direction', () => {
+    expect(snapOffsetFor(offsets, 100, 1)).toBe(330);
+    expect(snapOffsetFor(offsets, 250, -1)).toBe(0);
+  });
+
+  it('snaps to the nearest offset without a direction', () => {
+    expect(snapOffsetFor(offsets, 100, 0)).toBe(0);
+    expect(snapOffsetFor(offsets, 200, 0)).toBe(330);
+  });
+
+  it('snaps to the first offset before the range', () => {
+    expect(snapOffsetFor(offsets, -50, 1)).toBe(0);
+  });
+
+  it('leaves the scroll free past the last offset', () => {
+    expect(snapOffsetFor(offsets, 330, 1)).toBeUndefined();
+    expect(snapOffsetFor(offsets, 500, -1)).toBeUndefined();
+    expect(snapOffsetFor(undefined, 100, 1)).toBeUndefined();
+    expect(snapOffsetFor([], 100, 1)).toBeUndefined();
   });
 });

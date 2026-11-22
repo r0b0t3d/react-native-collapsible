@@ -8,6 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import {
+  cancelAnimation,
   runOnJS,
   useAnimatedReaction,
   useAnimatedScrollHandler,
@@ -29,6 +30,7 @@ type ScrollableProps = CollapsibleProps & {
   ref?: Ref<any>;
   style?: StyleProp<ViewStyle>;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  snapToOffsets?: number[];
   onContentSizeChange?: (width: number, height: number) => void;
   onScrollBeginDrag?: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
 };
@@ -57,6 +59,10 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
     collapsibleDistance,
     contentMinHeight,
     containerHeight,
+    scrollableRef,
+    scrollableContentHeight,
+    dragScrollY,
+    snapOffsets,
   } = useInternalCollapsibleContext();
   const node = useRef<any>(null);
   const [layout, setLayout] = useState<ScrollableLayout>({
@@ -86,9 +92,10 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
   const ref = useCallback(
     (instance: any) => {
       node.current = instance;
+      scrollableRef(instance);
       assignRef(userRef, instance);
     },
-    [userRef]
+    [userRef, scrollableRef]
   );
 
   const restore = useRef({ target: 0, contentHeight: 0 });
@@ -151,17 +158,19 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
     (width: number, height: number) => {
       onContentSizeChange?.(width, height);
       restore.current.contentHeight = height;
+      scrollableContentHeight.value = height;
       applyRestore();
     },
-    [onContentSizeChange, applyRestore]
+    [onContentSizeChange, scrollableContentHeight, applyRestore]
   );
 
   const handleScrollBeginDrag = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       onScrollBeginDrag?.(event);
       restore.current.target = 0;
+      cancelAnimation(dragScrollY);
     },
-    [onScrollBeginDrag]
+    [onScrollBeginDrag, dragScrollY]
   );
 
   const onScroll = useAnimatedScrollHandler((event) => {
@@ -175,6 +184,12 @@ export default function useCollapsibleScrollable<P extends ScrollableProps>(
         : undefined,
     [headerSnappable, layout.collapsibleDistance]
   );
+
+  const effectiveSnapOffsets = props.snapToOffsets ?? snapToOffsets;
+
+  useEffect(() => {
+    snapOffsets.value = effectiveSnapOffsets;
+  }, [snapOffsets, effectiveSnapOffsets]);
 
   return {
     keyboardDismissMode: 'on-drag' as const,

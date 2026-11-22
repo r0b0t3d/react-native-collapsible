@@ -12,6 +12,20 @@ yarn add @r0b0t3d/react-native-collapsible
 
 I am using `reanimated 2` for animation. So you should install and follow instruction here to setup your project [react-native-reanimated](https://docs.swmansion.com/react-native-reanimated/docs/installation)
 
+Install [react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/installation) too. Wrap your app root in `GestureHandlerRootView`:
+
+```jsx
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+export default function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* your app */}
+    </GestureHandlerRootView>
+  );
+}
+```
+
 ## Key features
 1️⃣ Support FlatList/ScrollView
 2️⃣ Support sticky header
@@ -145,7 +159,6 @@ Note: Feel free to add your showcase here by a PR
 - Scrollables log a warning when you call a scroll method they do not support, for example `scrollToIndex` on `CollapsibleScrollView`.
 - Removed
   - `useDynamicLayout` prop of `CollapsibleView`. The content height is always tracked.
-  - `react-native-gesture-handler` peer dependency.
 
 ### 1.0.0
 
@@ -160,35 +173,17 @@ Note: Feel free to add your showcase here by a PR
 
 ## Tips
 
-#### 1. Trigger scroll when scroll inside `CollapsibleHeaderContainer`
+#### 1. Scroll by dragging inside `CollapsibleHeaderContainer`
 
-- If your header doesn't contains touchable component, try `pointerEvents="none"`
+A vertical drag that starts on the header content scrolls the list. Taps and horizontal scrolling inside the header still work. When `headerSnappable` is on, the header snaps after the drag, like it does after a list drag. To turn this off, set `scrollOnDrag={false}`:
+
+A vertical drag that starts on a button cancels the press, like it does in a `ScrollView`. Turn this off if the header contains its own vertical gesture, for example a vertical `ScrollView` or a `Swipeable` with vertical actions.
 
 ```jsx
-<CollapsibleHeaderContainer>
-  <View pointerEvents="none">
+<CollapsibleHeaderContainer scrollOnDrag={false}>
+  <View>
     <Text>Header</Text>
   </View>
-</CollapsibleHeaderContainer>
-```
-
-- If your header contains touchable componet, try to set `pointerEvents="box-none"` for every nested views that contains touchable, otherwise use `pointerEvents="none"`
-
-```jsx
-<CollapsibleHeaderContainer>
-    <View pointerEvents="box-none"> // <-- this is parent view
-        <View pointerEvents="none"> // <-- this view doesn't contain touchable component
-            <Text>Header</Text>
-        </View>
-        <View pointerEvents="box-none"> // <-- this view contain touchable component
-            <View pointerEvents="none">
-                <Text>Some text</Text>
-            </View>
-            <TouchableOpacity>
-                <Text>Button</Text>
-            </TouchableOpacity>
-        </View>
-    </View>
 </CollapsibleHeaderContainer>
 ```
 

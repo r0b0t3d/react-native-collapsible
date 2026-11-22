@@ -14,21 +14,27 @@ import {
   StyleSheet,
   ViewStyle,
 } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  cancelAnimation,
   SharedValue,
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withDecay,
+  withTiming,
 } from 'react-native-reanimated';
 import {
   useCollapsibleContext,
   useInternalCollapsibleContext,
 } from '../container/context';
 import {
+  clamp,
   HeaderLayout,
   headerScroll,
   headerTranslate,
+  snapOffsetFor,
   stackPosition,
 } from '../container/geometry';
 import { removeEntry, setEntry } from './layoutRegistry';
@@ -51,7 +57,11 @@ export function useHeaderContext() {
 type Props = {
   children: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
+  scrollOnDrag?: boolean;
 };
+
+const DRAG_ACTIVATION_OFFSET = 10;
+const DRAG_DECELERATION = 0.998;
 
 function isSameLayout(a: HeaderLayout, b: HeaderLayout | null) {
   'worklet';
@@ -66,12 +76,69 @@ function isSameLayout(a: HeaderLayout, b: HeaderLayout | null) {
 export default function CollapsibleHeaderContainer({
   children,
   containerStyle,
+  scrollOnDrag = true,
 }: Props) {
   const key = useId();
-  const { headerLayouts } = useInternalCollapsibleContext();
+  const {
+    headerLayouts,
+    containerHeight,
+    scrollableContentHeight,
+    dragScrollY,
+    snapOffsets,
+  } = useInternalCollapsibleContext();
   const { scrollY } = useCollapsibleContext();
   const frame = useSharedValue<LayoutRectangle | null>(null);
   const stickyHeights = useSharedValue<Record<string, number>>({});
+  const dragStartY = useSharedValue(0);
+
+  const dragGesture = useMemo(() => {
+    const maxScroll = () => {
+      'worklet';
+      return Math.max(0, scrollableContentHeight.value - containerHeight.value);
+    };
+    return Gesture.Pan()
+      .enabled(scrollOnDrag)
+      .activeOffsetY([-DRAG_ACTIVATION_OFFSET, DRAG_ACTIVATION_OFFSET])
+      .failOffsetX([-DRAG_ACTIVATION_OFFSET, DRAG_ACTIVATION_OFFSET])
+      .onStart(() => {
+        cancelAnimation(dragScrollY);
+        dragStartY.value = scrollY.value;
+      })
+      .onUpdate(({ translationY }) => {
+        dragScrollY.value = clamp(
+          dragStartY.value - translationY,
+          0,
+          maxScroll()
+        );
+      })
+      .onEnd(({ velocityY }) => {
+        const velocity = -velocityY;
+        const projected =
+          dragScrollY.value +
+          (velocity * DRAG_DECELERATION) / ((1 - DRAG_DECELERATION) * 1000);
+        const snapOffset = snapOffsetFor(
+          snapOffsets.value,
+          projected,
+          Math.sign(velocity)
+        );
+        dragScrollY.value =
+          snapOffset === undefined
+            ? withDecay({
+                velocity,
+                deceleration: DRAG_DECELERATION,
+                clamp: [0, maxScroll()],
+              })
+            : withTiming(Math.min(snapOffset, maxScroll()));
+      });
+  }, [
+    scrollOnDrag,
+    scrollableContentHeight,
+    containerHeight,
+    dragScrollY,
+    dragStartY,
+    snapOffsets,
+    scrollY,
+  ]);
 
   useEffect(() => () => removeEntry(headerLayouts, key), [headerLayouts, key]);
 
@@ -137,13 +204,15 @@ export default function CollapsibleHeaderContainer({
 
   return (
     <HeaderContext.Provider value={context}>
-      <Animated.View
-        style={[styles.container, containerStyle, animatedStyle]}
-        pointerEvents="box-none"
-        onLayout={handleLayout}
-      >
-        {children}
-      </Animated.View>
+      <GestureDetector gesture={dragGesture}>
+        <Animated.View
+          style={[styles.container, containerStyle, animatedStyle]}
+          pointerEvents="box-none"
+          onLayout={handleLayout}
+        >
+          {children}
+        </Animated.View>
+      </GestureDetector>
     </HeaderContext.Provider>
   );
 }

@@ -11,7 +11,7 @@ export type StackPosition = {
   top: number;
 };
 
-function clamp(value: number, min: number, max: number) {
+export function clamp(value: number, min: number, max: number) {
   'worklet';
   return Math.max(min, Math.min(value, max));
 }
@@ -97,4 +97,34 @@ export function headerScroll(
 export function stickyTranslate(scrolled: number, stickyY: number) {
   'worklet';
   return Math.max(0, scrolled - stickyY);
+}
+
+export function snapOffsetFor(
+  offsets: number[] | undefined,
+  projected: number,
+  direction: number
+) {
+  'worklet';
+  if (!offsets || offsets.length === 0) {
+    return undefined;
+  }
+  if (projected >= offsets[offsets.length - 1]!) {
+    return undefined;
+  }
+  if (projected < offsets[0]!) {
+    return offsets[0]!;
+  }
+  let index = 0;
+  while (offsets[index + 1]! <= projected) {
+    index += 1;
+  }
+  const lower = offsets[index]!;
+  const upper = offsets[index + 1]!;
+  if (direction > 0) {
+    return upper;
+  }
+  if (direction < 0) {
+    return lower;
+  }
+  return projected - lower < upper - projected ? lower : upper;
 }

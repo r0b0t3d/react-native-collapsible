@@ -1,6 +1,12 @@
 import React, { ComponentType, RefObject, useMemo, useRef } from 'react';
 import type { View } from 'react-native';
-import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
+import {
+  scrollTo,
+  useAnimatedReaction,
+  useAnimatedRef,
+  useDerivedValue,
+  useSharedValue,
+} from 'react-native-reanimated';
 import type { CollapsibleContextType, CollapsibleHandles } from '../types';
 import {
   CollapsibleContext,
@@ -23,6 +29,19 @@ export default function withCollapsibleContext<T extends object>(
     const scrollY = useSharedValue(0);
     const containerHeight = useSharedValue(0);
     const headerLayouts = useSharedValue<HeaderLayouts>({});
+    const scrollableRef = useAnimatedRef<any>();
+    const scrollableContentHeight = useSharedValue(0);
+    const dragScrollY = useSharedValue(0);
+    const snapOffsets = useSharedValue<number[] | undefined>(undefined);
+
+    useAnimatedReaction(
+      () => dragScrollY.value,
+      (offset, previous) => {
+        if (previous !== null && offset !== previous) {
+          scrollTo(scrollableRef, 0, offset, false);
+        }
+      }
+    );
 
     const headerHeight = useDerivedValue(() =>
       headerHeightOf(headerLayouts.value)
@@ -44,6 +63,10 @@ export default function withCollapsibleContext<T extends object>(
         contentMinHeight,
         collapsibleDistance,
         headerLayouts,
+        scrollableRef,
+        scrollableContentHeight,
+        dragScrollY,
+        snapOffsets,
         measureInContainer: (ref: RefObject<any>, onMeasure) => {
           ref.current?.measureLayout(
             containerRef.current,
@@ -67,7 +90,16 @@ export default function withCollapsibleContext<T extends object>(
           };
         },
       }),
-      [containerHeight, contentMinHeight, collapsibleDistance, headerLayouts]
+      [
+        containerHeight,
+        contentMinHeight,
+        collapsibleDistance,
+        headerLayouts,
+        scrollableRef,
+        scrollableContentHeight,
+        dragScrollY,
+        snapOffsets,
+      ]
     );
 
     const context = useMemo<CollapsibleContextType>(

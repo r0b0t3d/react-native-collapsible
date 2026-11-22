@@ -1,6 +1,6 @@
 import { Context, createContext, RefObject, useContext } from 'react';
 import type { View } from 'react-native';
-import type { SharedValue } from 'react-native-reanimated';
+import type { AnimatedRef, SharedValue } from 'react-native-reanimated';
 import type { CollapsibleContextType, CollapsibleHandles } from '../types';
 import type { HeaderLayouts } from './geometry';
 
@@ -10,6 +10,10 @@ export type InternalCollapsibleContextType = {
   contentMinHeight: SharedValue<number>;
   collapsibleDistance: SharedValue<number>;
   headerLayouts: SharedValue<HeaderLayouts>;
+  scrollableRef: AnimatedRef<any>;
+  scrollableContentHeight: SharedValue<number>;
+  dragScrollY: SharedValue<number>;
+  snapOffsets: SharedValue<number[] | undefined>;
   measureInContainer: (
     ref: RefObject<any>,
     onMeasure: (top: number, height: number) => void
