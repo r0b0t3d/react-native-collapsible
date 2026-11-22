@@ -10,7 +10,6 @@ import {
 import useKeyboardShowEvent from '../hooks/useKeyboardShowEvent';
 import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
 import useCollapsibleContext from '../hooks/useCollapsibleContext';
-import CollapsibleHeaderConsumer from './header/CollapsibleHeaderConsumer';
 
 type Props = Omit<ViewProps, 'ref' | 'onLayout'> & {
   children: React.ReactNode;
@@ -98,7 +97,7 @@ export default function CollapsibleContainerWrapper({
         collapsable={false}
         onLayout={handleLayout}
       >
-        <CollapsibleHeaderConsumer>{children}</CollapsibleHeaderConsumer>
+        {children}
       </View>
     );
   }

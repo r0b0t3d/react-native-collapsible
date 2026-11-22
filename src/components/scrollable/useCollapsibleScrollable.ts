@@ -33,7 +33,7 @@ export default function useCollapsibleScrollable(
   const {
     scrollViewRef,
     setCollapsibleHandlers,
-    fixedHeaderHeight,
+    headerHeight,
     collapsibleDistance,
     contentMinHeight,
   } = useInternalCollapsibleContext();
@@ -45,7 +45,7 @@ export default function useCollapsibleScrollable(
 
   useAnimatedReaction(
     () => ({
-      progressViewOffset: fixedHeaderHeight.value,
+      progressViewOffset: headerHeight.value,
       contentMinHeight: contentMinHeight.value,
       collapsibleDistance: collapsibleDistance.value,
     }),

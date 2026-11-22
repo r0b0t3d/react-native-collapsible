@@ -1,6 +1,5 @@
-import React, { ReactNode, useEffect, useId, useMemo, useRef } from 'react';
+import React, { ReactNode, useId, useMemo, useRef } from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
-import useCollapsibleHeaderConsumerContext from '../../hooks/useCollapsibleHeaderConsumerContext';
 import CollapsibleHeaderContainerProvider from './CollapsibleHeaderContainerProvider';
 
 type Props = {
@@ -26,38 +25,18 @@ export default function CollapsibleHeaderContainer({
 }: Props) {
   const contentKey = `collapsible-header-${useId()}`;
   const instanceZIndex = useInstanceZIndex();
-  const { mount, unmount, update } = useCollapsibleHeaderConsumerContext();
 
   const internalStyle = useMemo(
     () => ({ zIndex: 100000 - instanceZIndex }),
     [instanceZIndex]
   );
 
-  const content = useMemo(() => {
-    return (
-      <CollapsibleHeaderContainerProvider
-        containerStyle={[internalStyle, containerStyle]}
-        contentKey={contentKey}
-        key={contentKey}
-      >
-        {children}
-      </CollapsibleHeaderContainerProvider>
-    );
-  }, [children, containerStyle, contentKey, internalStyle]);
-
-  useEffect(() => {
-    mount(contentKey, content);
-
-    return () => {
-      unmount(contentKey);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contentKey]);
-
-  useEffect(() => {
-    update(contentKey, content);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]);
-
-  return null;
+  return (
+    <CollapsibleHeaderContainerProvider
+      containerStyle={[internalStyle, containerStyle]}
+      contentKey={contentKey}
+    >
+      {children}
+    </CollapsibleHeaderContainerProvider>
+  );
 }

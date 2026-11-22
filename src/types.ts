@@ -60,7 +60,6 @@ export type CollapsibleContextInternalType = {
   headerViewPositions: SharedValue<
     Record<string, { top: number; stickyHeight: number }>
   >;
-  fixedHeaderHeight: SharedValue<number>;
   collapsibleDistance: SharedValue<number>;
   headerHeight: SharedValue<number>;
   headerLayouts: SharedValue<Record<string, HeaderLayout>>;

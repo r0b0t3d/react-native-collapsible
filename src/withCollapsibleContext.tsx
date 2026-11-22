@@ -9,9 +9,7 @@ import type { View } from 'react-native';
 export default function withCollapsibleContext<T>(Component: FC<T>) {
   return (props: T) => {
     const collapsibleHandlers = useRef<CollapsibleHandles>(null);
-    const headerHeight = useSharedValue(0);
     const scrollY = useSharedValue(0);
-    const fixedHeaderHeight = useSharedValue(0);
     const containerHeight = useSharedValue(0);
     const scrollViewRef = useRef<View>(null);
     const containerRef = useRef<View>(null);
@@ -39,12 +37,21 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       return positions;
     }, []);
 
+    const headerHeight = useDerivedValue(
+      () =>
+        Object.values(headerLayouts.value).reduce(
+          (acc, layout) => Math.max(acc, layout.y + layout.height),
+          0
+        ),
+      []
+    );
+
     const collapsibleDistance = useDerivedValue(() => {
       const stickyHeight = Object.values(headerLayouts.value).reduce(
         (acc, layout) => acc + layout.stickyHeight,
         0
       );
-      return Math.max(0, fixedHeaderHeight.value - stickyHeight);
+      return Math.max(0, headerHeight.value - stickyHeight);
     }, []);
 
     const headerCollapsed = useDerivedValue(() => {
@@ -103,7 +110,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         headerLayouts,
         setCollapsibleHandlers,
         headerHeight,
-        fixedHeaderHeight,
         collapsibleDistance,
         contentMinHeight,
         headerViewPositions,
@@ -112,7 +118,6 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         setCollapsibleHandlers,
         headerLayouts,
         headerHeight,
-        fixedHeaderHeight,
         collapsibleDistance,
         contentMinHeight,
         headerViewPositions,

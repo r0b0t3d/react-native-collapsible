@@ -113,6 +113,15 @@ Note: Feel free to add your showcase here by a PR
 
 ## Breaking changes
 
+### 1.6.0
+
+- `CollapsibleHeaderContainer` renders in place. It must be a direct child of `CollapsibleContainer`. Fragments are fine, but do not wrap it in a `View`.
+- `headerHeight` is read-only. It is derived from the header layouts.
+- Header snapping uses native `snapToOffsets`. A `snapToOffsets` prop that you pass replaces header snapping.
+- Removed
+  - `useDynamicLayout` prop of `CollapsibleView`. The content height is always tracked.
+  - `react-native-gesture-handler` peer dependency.
+
 ### 1.0.0
 
 - Removed
