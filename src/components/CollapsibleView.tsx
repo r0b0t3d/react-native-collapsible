@@ -79,14 +79,9 @@ export default function CollapsibleView({
     [actualHeight]
   );
 
-  const wrapperStyle = useAnimatedStyle(() => {
-    if (actualHeight.value === 0) {
-      return collapseState.value === 0 ? { height: 0 } : {};
-    }
-    return {
-      height: interpolate(collapseState.value, [0, 1], [0, actualHeight.value]),
-    };
-  }, [actualHeight, collapseState]);
+  const wrapperStyle = useAnimatedStyle(() => ({
+    height: interpolate(collapseState.value, [0, 1], [0, actualHeight.value]),
+  }));
 
   useAnimatedReaction(
     () => (collapseState.value === 1 ? 1 : 0),
@@ -129,7 +124,11 @@ export default function CollapsibleView({
         style={[styles.wrapper, wrapperStyle]}
         pointerEvents="box-none"
       >
-        <View onLayout={handleLayout} pointerEvents="box-none">
+        <View
+          style={styles.content}
+          onLayout={handleLayout}
+          pointerEvents="box-none"
+        >
           {children}
         </View>
       </Animated.View>
@@ -203,6 +202,12 @@ export function CollapsibleHeaderText({
 const styles = StyleSheet.create({
   wrapper: {
     overflow: 'hidden',
+  },
+  content: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   headerContainer: {
     flexDirection: 'row',
