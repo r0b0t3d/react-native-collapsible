@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
 import {
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import {
@@ -57,8 +57,12 @@ function CollapsibleList() {
           </CollapsibleView>
           <StickyView style={{ paddingTop: top }}>
             <View style={styles.tabsContainer}>
-              <TouchableOpacity
-                style={[styles.tab, currentTab === 0 ? styles.tabSelected : {}]}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.tab,
+                  currentTab === 0 ? styles.tabSelected : {},
+                  { opacity: pressed ? 0.7 : 1 },
+                ]}
                 onPress={() => setCurrentTab(0)}
               >
                 <Text
@@ -69,9 +73,13 @@ function CollapsibleList() {
                 >
                   TOP 100
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.tab, currentTab === 1 ? styles.tabSelected : {}]}
+              </Pressable>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.tab,
+                  currentTab === 1 ? styles.tabSelected : {},
+                  { opacity: pressed ? 0.7 : 1 },
+                ]}
                 onPress={() => setCurrentTab(1)}
               >
                 <Text
@@ -82,7 +90,7 @@ function CollapsibleList() {
                 >
                   ALBUMS
                 </Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </StickyView>
         </CollapsibleHeaderContainer>

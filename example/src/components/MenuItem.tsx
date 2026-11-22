@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 
 type Props = {
   title: string;
@@ -8,9 +8,15 @@ type Props = {
 
 export default function MenuItem({ title, onPress }: Props) {
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [
+        { opacity: pressed ? 0.7 : 1 },
+        styles.container,
+      ]}
+      onPress={onPress}
+    >
       <Text style={styles.title}>{title}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
