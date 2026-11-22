@@ -55,6 +55,7 @@ export type CollapsibleContextInternalType = {
     Record<string, { top: number; stickyHeight: number }>
   >;
   fixedHeaderHeight: SharedValue<number>;
+  collapsibleDistance: SharedValue<number>;
   headerHeight: SharedValue<number>;
   handleHeaderContainerLayout: (
     key: string,

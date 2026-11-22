@@ -26,7 +26,7 @@ export default function useAnimatedScroll({
 }: Props) {
   const scrollDirection = useSharedValue('unknown');
   const { scrollY } = useCollapsibleContext();
-  const { setCollapsibleHandlers, fixedHeaderHeight } =
+  const { setCollapsibleHandlers, collapsibleDistance } =
     useInternalCollapsibleContext();
 
   // Keep a ref to the latest handlers so we can publish stable function
@@ -51,9 +51,9 @@ export default function useAnimatedScroll({
 
   const collapse = useCallback(
     (animated = true) => {
-      handlersRef.current.scrollTo(fixedHeaderHeight.value, animated);
+      handlersRef.current.scrollTo(collapsibleDistance.value, animated);
     },
-    [fixedHeaderHeight]
+    [collapsibleDistance]
   );
 
   const expand = useCallback(() => handlersRef.current.scrollTo(0), []);
@@ -86,7 +86,7 @@ export default function useAnimatedScroll({
       },
       onEndDrag: () => {
         if (!headerSnappable) return;
-        const maxY = fixedHeaderHeight.value;
+        const maxY = collapsibleDistance.value;
 
         if (scrollY.value < maxY) {
           const delta = Math.abs(scrollY.value - maxY);
@@ -100,7 +100,7 @@ export default function useAnimatedScroll({
         }
       },
     },
-    [headerSnappable, fixedHeaderHeight, scrollY, scrollToOnJS]
+    [headerSnappable, collapsibleDistance, scrollY, scrollToOnJS]
   );
 
   return {

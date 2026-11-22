@@ -18,7 +18,9 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
     const headerContainerLayouts = useRef<
       Record<string, (LayoutRectangle & { stickyHeight?: number }) | undefined>
     >({});
-    const headerViewPositions = useSharedValue({});
+    const headerViewPositions = useSharedValue<
+      Record<string, { top: number; stickyHeight: number }>
+    >({});
 
     const setCollapsibleHandlers = useCallback(
       (handlers: CollapsibleHandles) => {
@@ -27,13 +29,20 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
       []
     );
 
+    const collapsibleDistance = useDerivedValue(() => {
+      const stickyHeight = Object.values(headerViewPositions.value).reduce(
+        (acc, position) => acc + position.stickyHeight,
+        0
+      );
+      return Math.max(0, fixedHeaderHeight.value - stickyHeight);
+    }, []);
+
     const headerCollapsed = useDerivedValue(() => {
-      const maxY = fixedHeaderHeight.value;
-      return scrollY.value >= maxY;
+      return scrollY.value >= collapsibleDistance.value;
     }, []);
 
     const contentMinHeight = useDerivedValue(() => {
-      return containerHeight.value + fixedHeaderHeight.value;
+      return containerHeight.value + collapsibleDistance.value;
     }, []);
 
     const handleHeaderContainerLayout = useCallback(
@@ -131,6 +140,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         setCollapsibleHandlers,
         headerHeight,
         fixedHeaderHeight,
+        collapsibleDistance,
         contentMinHeight,
         headerViewPositions,
       }),
@@ -139,6 +149,7 @@ export default function withCollapsibleContext<T>(Component: FC<T>) {
         handleHeaderContainerLayout,
         headerHeight,
         fixedHeaderHeight,
+        collapsibleDistance,
         contentMinHeight,
         headerViewPositions,
       ]
