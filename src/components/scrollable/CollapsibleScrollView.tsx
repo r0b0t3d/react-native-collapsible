@@ -1,23 +1,18 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import AnimatedTopView from '../header/AnimatedTopView';
-import useAnimatedScroll from './useAnimatedScroll';
-import React, {
-  ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { RefreshControl, ScrollViewProps, StyleSheet } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedReaction,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import React, { ReactNode, useMemo } from 'react';
+import {
+  RefreshControl,
+  ScrollViewProps,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Animated from 'react-native-reanimated';
 import type { CollapsibleProps } from '../../types';
 import useCollapsibleContext from '../../hooks/useCollapsibleContext';
-import useInternalCollapsibleContext from '../../hooks/useInternalCollapsibleContext';
+import AnimatedTopView from '../header/AnimatedTopView';
+import useCollapsibleScrollable, {
+  ScrollableMethods,
+  unsupported,
+} from './useCollapsibleScrollable';
 
 type Props = ScrollViewProps &
   CollapsibleProps & {
@@ -26,6 +21,13 @@ type Props = ScrollViewProps &
     onRefresh?: () => void;
   };
 
+const methods: ScrollableMethods = {
+  scrollTo: (scrollView, y, animated = true) =>
+    scrollView?.scrollTo({ y, animated }),
+  scrollToIndex: unsupported('CollapsibleScrollView', 'scrollToIndex'),
+  scrollToLocation: unsupported('CollapsibleScrollView', 'scrollToLocation'),
+};
+
 export default function CollapsibleScrollView({
   headerSnappable = true,
   children,
@@ -33,60 +35,13 @@ export default function CollapsibleScrollView({
   onRefresh,
   ...props
 }: Props) {
-  const { contentMinHeight, scrollViewRef, fixedHeaderHeight } =
-    useInternalCollapsibleContext();
   const { headerHeight } = useCollapsibleContext();
-  const [internalProgressViewOffset, setInternalProgressViewOffset] =
-    useState(0);
-  const mounted = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const scrollTo = useCallback((yValue: number, animated = true) => {
-    scrollViewRef.current?.scrollTo?.({ y: yValue, animated });
-  }, []);
-
-  const scrollToIndex = useCallback(() => {
-    console.warn("CollapsibleScrollView doesn't support scrollToIndex");
-  }, []);
-
-  const scrollToLocation = useCallback(() => {
-    console.warn('CollapsibleFlatList does not support scrollToLocation');
-  }, []);
-
-  const { scrollHandler } = useAnimatedScroll({
-    headerSnappable,
-    scrollTo,
-    scrollToIndex,
-    scrollToLocation,
-  });
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      minHeight: contentMinHeight.value,
-    };
-  }, []);
-
-  const handleInternalProgressViewOffset = useCallback((value: number) => {
-    if (mounted.current) {
-      setInternalProgressViewOffset(value);
-    }
-  }, []);
-
-  useAnimatedReaction(
-    () => {
-      return fixedHeaderHeight.value;
-    },
-    (result, previous) => {
-      if (result !== previous) {
-        runOnJS(handleInternalProgressViewOffset)(result);
-      }
-    }
-  );
+  const {
+    scrollableProps,
+    scrollHandler,
+    progressViewOffset,
+    contentMinHeight,
+  } = useCollapsibleScrollable(methods, headerSnappable);
 
   const contentContainerStyle = useMemo(
     () => [styles.contentContainer, props.contentContainerStyle],
@@ -95,11 +50,11 @@ export default function CollapsibleScrollView({
 
   return (
     <Animated.ScrollView
-      ref={scrollViewRef}
+      {...scrollableProps}
       refreshControl={
         onRefresh ? (
           <RefreshControl
-            progressViewOffset={internalProgressViewOffset}
+            progressViewOffset={progressViewOffset}
             refreshing={refreshing}
             onRefresh={onRefresh}
           />
@@ -109,14 +64,11 @@ export default function CollapsibleScrollView({
       style={[StyleSheet.absoluteFill, props.style]}
       contentContainerStyle={contentContainerStyle}
       onScroll={scrollHandler}
-      keyboardDismissMode="on-drag"
-      keyboardShouldPersistTaps="handled"
-      scrollEventThrottle={1}
     >
-      <Animated.View style={animatedStyle}>
+      <View style={{ minHeight: contentMinHeight }}>
         <AnimatedTopView height={headerHeight} />
         {children}
-      </Animated.View>
+      </View>
     </Animated.ScrollView>
   );
 }

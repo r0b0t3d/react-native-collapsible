@@ -1,107 +1,43 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import Animated, {
-  runOnJS,
-  useAnimatedReaction,
-} from 'react-native-reanimated';
-import useAnimatedScroll from '../components/scrollable/useAnimatedScroll';
-import useInternalCollapsibleContext from '../hooks/useInternalCollapsibleContext';
-import type { CollapsibleProps } from '../types';
-import AnimatedTopView from '../components/header/AnimatedTopView';
-import useCollapsibleContext from '../hooks/useCollapsibleContext';
+import Animated from 'react-native-reanimated';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
-import type { ScrollToIndexParams } from '../types';
+import type { CollapsibleProps } from '../types';
+import useCollapsibleScrollable, {
+  ScrollableMethods,
+  unsupported,
+} from '../components/scrollable/useCollapsibleScrollable';
+import CollapsibleListHeader from '../components/scrollable/CollapsibleListHeader';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
 type Props<Data> = FlashListProps<Data> & CollapsibleProps;
 
+const methods: ScrollableMethods = {
+  scrollTo: (list, offset, animated = true) =>
+    list?.scrollToOffset({ offset, animated }),
+  scrollToIndex: (list, params) => list?.scrollToIndex(params),
+  scrollToLocation: unsupported('CollapsibleFlashList', 'scrollToLocation'),
+};
+
 export default function CollapsibleFlashList<Data>({
   headerSnappable = true,
   ...props
 }: Props<Data>) {
-  const { headerHeight } = useCollapsibleContext();
-  const { scrollViewRef, fixedHeaderHeight } = useInternalCollapsibleContext();
-  const mounted = useRef(true);
-  const [internalProgressViewOffset, setInternalProgressViewOffset] =
-    useState(0);
-
-  useEffect(() => {
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  const scrollTo = useCallback((yValue: number, animated = true) => {
-    scrollViewRef.current?.scrollToOffset?.({
-      offset: yValue,
-      animated,
-    });
-  }, []);
-
-  const scrollToIndex = useCallback((params: ScrollToIndexParams) => {
-    scrollViewRef.current?.scrollToIndex?.(params);
-  }, []);
-
-  const scrollToLocation = useCallback(() => {
-    console.warn('CollapsibleFlatList does not support scrollToLocation');
-  }, []);
-
-  const { scrollHandler } = useAnimatedScroll({
-    headerSnappable,
-    scrollTo,
-    scrollToIndex,
-    scrollToLocation,
-  });
-
-  const handleInternalProgressViewOffset = useCallback((value: number) => {
-    if (mounted.current) {
-      setInternalProgressViewOffset(value);
-    }
-  }, []);
-
-  useAnimatedReaction(
-    () => {
-      return fixedHeaderHeight.value;
-    },
-    (result, previous) => {
-      if (result !== previous) {
-        runOnJS(handleInternalProgressViewOffset)(result);
-      }
-    }
-  );
-
-  const handleScrollToIndexFailed = useCallback(() => {}, []);
-
-  const ListHeaderComponent = props.ListHeaderComponent;
-  function renderListHeader() {
-    return (
-      <View>
-        <AnimatedTopView height={headerHeight} />
-        {ListHeaderComponent &&
-          (typeof ListHeaderComponent === 'function'
-            ? React.createElement(ListHeaderComponent)
-            : ListHeaderComponent)}
-      </View>
-    );
-  }
+  const { scrollableProps, scrollHandler, progressViewOffset } =
+    useCollapsibleScrollable(methods, headerSnappable);
 
   return (
     <View style={[StyleSheet.absoluteFill, props.style]}>
+      {/* @ts-ignore */}
       <AnimatedFlashList
-        ref={scrollViewRef}
-        keyboardDismissMode="on-drag"
-        keyboardShouldPersistTaps="handled"
-        scrollEventThrottle={1}
-        onScrollToIndexFailed={handleScrollToIndexFailed}
+        {...scrollableProps}
         {...props}
-        // @ts-ignore
         onScroll={scrollHandler}
-        ListHeaderComponent={renderListHeader()}
-        //@ts-ignore
-        simultaneousHandlers={[]}
-        progressViewOffset={internalProgressViewOffset}
+        ListHeaderComponent={
+          <CollapsibleListHeader component={props.ListHeaderComponent} />
+        }
+        progressViewOffset={progressViewOffset}
       />
     </View>
   );
