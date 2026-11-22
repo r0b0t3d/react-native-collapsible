@@ -26,6 +26,14 @@ export default function Home({}: Props) {
         title={'CollapsibleView'}
         onPress={navigate('CollapsibleViewScreen')}
       />
+      <MenuItem
+        title={'CollapsibleFlashList'}
+        onPress={navigate('FlashListScreen')}
+      />
+      <MenuItem
+        title={'CollapsibleLegendList'}
+        onPress={navigate('LegendListScreen')}
+      />
     </View>
   );
 }

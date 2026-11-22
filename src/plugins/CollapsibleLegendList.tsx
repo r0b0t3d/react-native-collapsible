@@ -1,13 +1,16 @@
 import React from 'react';
-import { FlatListProps, View } from 'react-native';
-import { AnimatedLegendList } from '@legendapp/list/reanimated';
+import {
+  AnimatedLegendList,
+  AnimatedLegendListProps,
+} from '@legendapp/list/reanimated';
 import type { CollapsibleProps } from '../types';
 import useCollapsibleScrollable, {
   ScrollableAdapter,
 } from '../scrollable/useCollapsibleScrollable';
 import { renderListHeader } from '../scrollable/HeaderSpacer';
 
-type Props<Data> = FlatListProps<Data> & CollapsibleProps;
+type Props<Data> = Omit<AnimatedLegendListProps<Data>, 'scrollEnabled'> &
+  CollapsibleProps;
 
 const adapter: ScrollableAdapter = {
   name: 'CollapsibleLegendList',
@@ -17,20 +20,12 @@ const adapter: ScrollableAdapter = {
 };
 
 export default function CollapsibleLegendList<Data>(props: Props<Data>) {
-  const { style, ...scrollableProps } = useCollapsibleScrollable(
-    adapter,
-    props
-  );
+  const scrollableProps = useCollapsibleScrollable(adapter, props);
 
   return (
-    <View style={style}>
-      {/* @ts-expect-error animated list types drop the generic item type */}
-      <AnimatedLegendList
-        {...scrollableProps}
-        style={props.style}
-        contentContainerStyle={props.contentContainerStyle}
-        ListHeaderComponent={renderListHeader(props.ListHeaderComponent)}
-      />
-    </View>
+    <AnimatedLegendList
+      {...scrollableProps}
+      ListHeaderComponent={renderListHeader(props.ListHeaderComponent)}
+    />
   );
 }

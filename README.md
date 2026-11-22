@@ -103,6 +103,29 @@ const FirstTab = () => {
 }
 ```
 
+### 3. FlashList and LegendList
+
+`CollapsibleFlashList` and `CollapsibleLegendList` are optional. They are not exported from the main entry, so your app does not need these libraries unless you import them.
+
+Install the list library first:
+
+```sh
+yarn add @shopify/flash-list   # for CollapsibleFlashList
+yarn add @legendapp/list       # for CollapsibleLegendList
+```
+
+Then import the component from its own path:
+
+```jsx
+import CollapsibleFlashList from '@r0b0t3d/react-native-collapsible/plugins/CollapsibleFlashList';
+import CollapsibleLegendList from '@r0b0t3d/react-native-collapsible/plugins/CollapsibleLegendList';
+
+<CollapsibleFlashList data={data} renderItem={renderItem} />
+<CollapsibleLegendList data={data} renderItem={renderItem} estimatedItemSize={60} />
+```
+
+Use them like `CollapsibleFlatList`. They accept the props of the list they wrap.
+
 ## Showcases
 ```
 Note: Feel free to add your showcase here by a PR

@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FlashList, FlashListProps } from '@shopify/flash-list';
 import type { CollapsibleProps } from '../types';
@@ -10,7 +9,8 @@ import { renderListHeader } from '../scrollable/HeaderSpacer';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
 
-type Props<Data> = FlashListProps<Data> & CollapsibleProps;
+type Props<Data> = Omit<FlashListProps<Data>, 'scrollEnabled'> &
+  CollapsibleProps;
 
 const adapter: ScrollableAdapter = {
   name: 'CollapsibleFlashList',
@@ -20,20 +20,13 @@ const adapter: ScrollableAdapter = {
 };
 
 export default function CollapsibleFlashList<Data>(props: Props<Data>) {
-  const { style, ...scrollableProps } = useCollapsibleScrollable(
-    adapter,
-    props
-  );
+  const scrollableProps = useCollapsibleScrollable(adapter, props);
 
   return (
-    <View style={style}>
-      {/* @ts-expect-error animated list types drop the generic item type */}
-      <AnimatedFlashList
-        {...scrollableProps}
-        style={props.style}
-        contentContainerStyle={props.contentContainerStyle}
-        ListHeaderComponent={renderListHeader(props.ListHeaderComponent)}
-      />
-    </View>
+    // @ts-expect-error animated list types drop the generic item type
+    <AnimatedFlashList
+      {...scrollableProps}
+      ListHeaderComponent={renderListHeader(props.ListHeaderComponent)}
+    />
   );
 }
