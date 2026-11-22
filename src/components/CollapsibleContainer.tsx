@@ -1,8 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import React, { useCallback, useLayoutEffect } from 'react';
+import React, { useCallback } from 'react';
 import {
   KeyboardAvoidingView,
   KeyboardAvoidingViewProps,
+  LayoutChangeEvent,
   StyleSheet,
   View,
   ViewProps,
@@ -82,10 +82,12 @@ export default function CollapsibleContainerWrapper({
 }: Props) {
   const { containerHeight, containerRef } = useInternalCollapsibleContext();
 
-  useLayoutEffect(() => {
-    const { height } = containerRef.current.getBoundingClientRect();
-    containerHeight.value = height;
-  }, []);
+  const handleLayout = useCallback(
+    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+      containerHeight.value = layout.height;
+    },
+    [containerHeight]
+  );
 
   function renderContent() {
     return (
@@ -94,6 +96,7 @@ export default function CollapsibleContainerWrapper({
         ref={containerRef}
         style={[styles.container, props.style]}
         collapsable={false}
+        onLayout={handleLayout}
       >
         <CollapsibleHeaderConsumer>{children}</CollapsibleHeaderConsumer>
       </View>
