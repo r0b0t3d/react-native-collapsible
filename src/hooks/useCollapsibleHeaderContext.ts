@@ -8,8 +8,7 @@ export type CollapsibleContextHeaderType = {
 };
 
 export const CollapsibleHeaderContext =
-  // @ts-ignore
-  createContext<CollapsibleContextHeaderType>({});
+  createContext<CollapsibleContextHeaderType | null>(null);
 
 export default function useCollapsibleHeaderContext() {
   const ctx = useContext(CollapsibleHeaderContext);

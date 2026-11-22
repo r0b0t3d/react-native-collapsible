@@ -2,8 +2,7 @@ import { createContext, useContext } from 'react';
 import type { CollapsibleContextInternalType } from '../types';
 
 export const InternalCollapsibleContext =
-  // @ts-ignore
-  createContext<CollapsibleContextInternalType>();
+  createContext<CollapsibleContextInternalType | null>(null);
 
 export default function useInternalCollapsibleContext() {
   const ctx = useContext(InternalCollapsibleContext);

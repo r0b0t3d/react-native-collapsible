@@ -10,8 +10,7 @@ type CollapsibleContextHeaderConsumerType = {
 };
 
 export const CollapsibleHeaderConsumerContext =
-  // @ts-ignore
-  createContext<CollapsibleContextHeaderConsumerType>({});
+  createContext<CollapsibleContextHeaderConsumerType | null>(null);
 
 export default function useCollapsibleHeaderConsumerContext() {
   const ctx = useContext(CollapsibleHeaderConsumerContext);
